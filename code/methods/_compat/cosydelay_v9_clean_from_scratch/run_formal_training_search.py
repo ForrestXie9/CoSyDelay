@@ -39,7 +39,10 @@ from methods.cosydelay_v9_clean_from_scratch.source_manifest import (  # noqa: E
 )
 
 
-DEFAULT_DATA_DIR = GMINI.parent.parent / "Final_cosy_delay" / "jsonl_files"
+# The release carries the frozen, training-only splits under ``data``.  Keep
+# the default relocatable so the public runner works after cloning elsewhere;
+# callers can still override it with ``--data-dir``.
+DEFAULT_DATA_DIR = GMINI.parent.parent / "data" / "locked_splits"
 DATASET_NAME = re.compile(
     r"^Intersection_(?P<intersection>\d+)_(?P<split>Train|Validation|Test)\.jsonl$",
     re.IGNORECASE,
