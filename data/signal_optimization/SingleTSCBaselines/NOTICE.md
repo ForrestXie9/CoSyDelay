@@ -13,7 +13,8 @@ This release includes only three scenarios:
 - `Chengdu_Guanghua`
 - `Tianjin_zhijingdao`
 
-The TSO scripts run these scenarios with Eclipse SUMO. Any generated vehicle
-trajectories, delays, or optimization outcomes are simulation outputs rather
-than field measurements. See the repository-level `CITATIONS.md` for the SUMO
-reference.
+This release contains scenario data only; no TSO controller or SUMO runner is
+included. If the scenarios are replayed with external tooling, any generated
+vehicle trajectories, delays, or optimization outcomes are simulation outputs
+rather than field measurements. See the repository-level `CITATIONS.md` for
+the SUMO reference.

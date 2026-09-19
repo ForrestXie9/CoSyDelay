@@ -56,11 +56,11 @@ These network, route, and SUMO configuration files come from the upstream
 CoSyDelay data. Attribution and license guidance are in the scenario
 `NOTICE.md` and repository-level `CITATIONS.md`.
 
-The TSO scripts derive demand from the route files, apply fixed CoSyDelay,
-Webster, HCM, Akcelik, and optimized timing plans, and evaluate the resulting
-trajectories with Eclipse SUMO. The resulting delays are SUMO simulation
-outputs, not field-observation labels. Cite Lopez et al. (2018) for SUMO; see
-`CITATIONS.md` for the complete reference.
+This release contains scenario data only; it does not include the TSO scripts
+or a SUMO runner. If replayed with external tooling, fixed CoSyDelay, Webster,
+HCM, Akcelik, and optimized timing plans produce SUMO simulation outputs, not
+field-observation labels. Cite Lopez et al. (2018) for SUMO; see `CITATIONS.md`
+for the complete reference.
 
 ## 4. Data boundaries
 
