@@ -1,0 +1,11 @@
+{
+  "keys": [
+    "sk-your-first-api-key",
+    "sk-your-second-api-key"
+  ],
+  "assignments": {
+    "principlewise": 0,
+    "sensitivity": 1,
+    "default": 0
+  }
+}

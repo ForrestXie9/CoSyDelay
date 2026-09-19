@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<connections>
+    <!-- Link order is R,T,L for S,N,E,W to match the four-phase controller. -->
+    <connection from="S_in" to="E_out" fromLane="0" toLane="0" tl="J0" linkIndex="0"/>
+    <connection from="S_in" to="N_out" fromLane="1" toLane="1" tl="J0" linkIndex="1"/>
+    <connection from="S_in" to="W_out" fromLane="2" toLane="2" tl="J0" linkIndex="2"/>
+    <connection from="N_in" to="W_out" fromLane="0" toLane="0" tl="J0" linkIndex="3"/>
+    <connection from="N_in" to="S_out" fromLane="1" toLane="1" tl="J0" linkIndex="4"/>
+    <connection from="N_in" to="E_out" fromLane="2" toLane="2" tl="J0" linkIndex="5"/>
+    <connection from="E_in" to="N_out" fromLane="0" toLane="0" tl="J0" linkIndex="6"/>
+    <connection from="E_in" to="W_out" fromLane="1" toLane="1" tl="J0" linkIndex="7"/>
+    <connection from="E_in" to="S_out" fromLane="2" toLane="2" tl="J0" linkIndex="8"/>
+    <connection from="W_in" to="S_out" fromLane="0" toLane="0" tl="J0" linkIndex="9"/>
+    <connection from="W_in" to="E_out" fromLane="1" toLane="1" tl="J0" linkIndex="10"/>
+    <connection from="W_in" to="N_out" fromLane="2" toLane="2" tl="J0" linkIndex="11"/>
+</connections>

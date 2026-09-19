@@ -1,0 +1,57 @@
+{
+  "status": "preliminary_same_layout_stress_test",
+  "claim_boundary": "Frozen V22 evaluated without refitting on input-deduplicated additional rows from the same six intersection layouts. This is not unseen-layout or external validation.",
+  "source": "Z:\\CoSydelay\\AASumo-I1to6_AllSites-14220.csv",
+  "source_sha256": "b5f4d44188c3f0f397b497ad7545e1a701b7ace02779f31f3780edbf14d9f234",
+  "source_data_rows": 14219,
+  "source_columns": 57,
+  "source_missing_cells": 0,
+  "source_full_row_duplicates": 0,
+  "source_internal_consistency": {
+    "max_abs_app_flow_minus_three_movement_sum": 9.094947017729282e-13,
+    "max_abs_gt_movement_prop_minus_gt_movement_over_cycle": 9.71445146547012e-17,
+    "max_abs_gt_approach_prop_minus_gt_approach_over_cycle": 8.326672684688674e-17
+  },
+  "site_mapping": {
+    "withoutShortLanes": 1,
+    "withShortLanes": 2,
+    "site1": 3,
+    "site2": 4,
+    "site3": 5,
+    "site4": 6
+  },
+  "model_visible_input_conversion": {
+    "movement_flow": "numpy.rint to integer veh/h, matching the deployed JSONL dialogue interface",
+    "phase_green": "numpy.rint to integer seconds",
+    "delay_target": "full precision from ADelay_1..ADelay_4"
+  },
+  "overlap_reference": "locked Training + Validation + Test union",
+  "near_duplicate_definition": {
+    "threshold": 0.02,
+    "distance": "Chebyshev distance",
+    "space": "active movement q/1800, active phase green ratios, and Cycle_Time/180"
+  },
+  "frozen_model_root": "Z:\\CoSydelay\\Paper_SM_traffic_delay\\Parameters_sensitive\\gmini\\methods\\cosydelay_v22_stable_regeneration\\experiments\\v22_i1_i6_single_20260826_195254",
+  "refit_or_selection_on_extension": false,
+  "audit_totals": {
+    "source_rows": 14219,
+    "locked_train": 5909,
+    "locked_validation": 1512,
+    "locked_test": 2853,
+    "exact_locked_overlap": 10274,
+    "deduplicated_candidates": 3945,
+    "near_duplicate_le_0.02": 5,
+    "strict_candidates": 3940,
+    "timing_unseen_vs_train": 1102,
+    "timing_unseen_vs_any_locked": 800,
+    "undersaturated": 194,
+    "near_capacity": 103,
+    "oversaturated": 3648,
+    "severe_x_ge_1.30": 3235
+  },
+  "outputs": {
+    "audit": "overlap_and_regime_audit.csv",
+    "metrics": "v22_frozen_metrics.csv",
+    "candidate_rows": "deduplicated_candidate_rows_with_predictions.csv"
+  }
+}

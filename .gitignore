@@ -1,0 +1,31 @@
+# Secrets and local configuration
+code/llm_keys.local.json
+.env
+*.pem
+*.key
+*.pfx
+
+# Generated runs and Python artifacts
+runs/
+**/__pycache__/
+*.py[cod]
+*.log
+
+# Deliberately excluded from the GitHub release
+data/original_jsonl/
+data/locked_splits/
+data/external_transfer/
+data/variants/
+data/signal_optimization/formal_model/
+data/signal_optimization/MANIFEST.json
+data/signal_optimization/README.md
+data/signal_optimization/results.csv
+data/signal_optimization/scenario_audit.json
+data/signal_optimization/summary*.csv
+data/signal_optimization/SingleTSCBaselines/README.md
+
+# Local notebooks/editors
+.venv/
+.pytest_cache/
+.idea/
+*.ipynb_checkpoints/
