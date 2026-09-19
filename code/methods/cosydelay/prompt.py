@@ -1,4 +1,4 @@
-"""CoSyDelay keeps the validated V21 prompt and narrows only regeneration wording."""
+"""Prompts used by the released CoSyDelay search."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ def build_init_prompt(
     include_physical_knowledge: bool = True,
     prompt_style: str = "standard",
 ) -> str:
-    """Initialization is intentionally identical to the valid V21 version."""
+    """Build the fixed initialization prompt."""
     return v21.build_init_prompt(
         feature_explanations,
         universal_features,

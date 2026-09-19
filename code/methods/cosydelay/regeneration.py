@@ -1,7 +1,6 @@
 """One broad-regeneration retry policy for CoSyDelay.
 
-The retained V20 overlay changed from regeneration to initialization after a
-short failed sequence.  CoSyDelay deliberately does not mix those two operations:
+CoSyDelay deliberately does not mix regeneration and initialization:
 all rejected offspring attempts use the same parent-conditioned broad
 regeneration prompt and the same five-attempt budget.  A later outer offspring
 draw may choose another parent, but no retry changes prompt type.

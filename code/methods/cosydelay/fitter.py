@@ -1,9 +1,9 @@
 """CoSyDelay accelerated fitter with a pre-screened nonlinear range profile.
 
 The objective, all-positive log coordinates, ten starts, restart scheduler,
-and Training-only restart selection remain identical to V21.  The only change
-is the range profile independently screened on fixed strict structures:
-power exponents ``[0.01, 8]`` and exponential coefficients ``[1e-5, 2]``.
+and Training-only restart selection are fixed by the released protocol. The
+nonlinear range profile uses power exponents ``[0.01, 8]`` and exponential
+coefficients ``[1e-5, 2]``.
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ from .range_policy import (
 
 
 class StableRangeAcceleratedFitter(PersistentAcceleratedEquivalentFitter):
-    """Retain V21 scheduling while supplying the audited role-wise bounds."""
+    """Run the released restart schedule with audited role-wise bounds."""
 
     def fit(self, *, universal_expr: str, warm_parameters: Optional[Mapping] = None, **kwargs):
         bounds = coefficient_bounds_for_expression(
@@ -55,7 +55,7 @@ class StableRangeAcceleratedFitter(PersistentAcceleratedEquivalentFitter):
 
 
 def accelerated_fit_supervisor_main(connection, static_kwargs: dict, settings: dict) -> None:
-    """Spawn-safe fitting supervisor mirroring V19 with the CoSyDelay profile."""
+    """Spawn-safe fitting supervisor for the released CoSyDelay profile."""
     fitter = None
     try:
         fitter = StableRangeAcceleratedFitter(

@@ -1,4 +1,4 @@
-"""Run one CoSyDelay search without changing the validated V21 core implementation."""
+"""Run one CoSyDelay search using the released training-only protocol."""
 
 from __future__ import annotations
 
@@ -32,8 +32,8 @@ def _source() -> str:
             history, population=10, generations=9
         )""",
             """        # CoSyDelay retains the same 10+9 search budget, but the legacy
-        # V19 restart-composition audit expects metadata that the compatibility
-        # supervisor does not serialize. Keep it non-blocking and record the
+        # The compatibility supervisor does not serialize legacy restart
+        # composition metadata. Keep it non-blocking and record the
         # provenance warning in the CoSyDelay result wrapper.
         v16_run._restart_composition_audit=lambda history: None""",
         ),
@@ -96,7 +96,7 @@ def main() -> int:
         {
             "formal_version": "CoSyDelay",
             "survivor_selection": "global_mu_plus_lambda",
-            "prompt_contract": "V21_numeric_domain_plus_broad_structural_regeneration",
+            "prompt_contract": "numeric_operating_domain_plus_broad_structural_regeneration",
             "restart_contract": (
                 "each outer restart runs the identical P10/G10 search; "
                 "only its declared seed differs"
@@ -117,7 +117,7 @@ def main() -> int:
             },
         }
     )
-    # The retained V18/V19 supervisor may omit the optional adapter marker
+    # The internal compatibility supervisor may omit the optional adapter marker
     # from serialized per-candidate diagnostics. Keep that audit state
     # explicit without treating an otherwise complete 100-candidate search as
     # a numerical failure.

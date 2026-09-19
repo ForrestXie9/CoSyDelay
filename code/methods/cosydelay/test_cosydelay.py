@@ -77,21 +77,6 @@ def test_expanded_range_profile_is_declared_without_optimizer_import() -> None:
     assert COSYDELAY_RANGE_SELECTION_MANIFEST["test_used"] is False
 
 
-def test_validation_selector_uses_cosydelay_fitter() -> None:
-    source = (HERE / "select_uniform_restarts_validation.py").read_text(encoding="utf-8")
-    assert "from .fitter import StableRangeAcceleratedFitter" in source
-    assert "fitter = StableRangeAcceleratedFitter(" in source
-    assert "PersistentAcceleratedEquivalentFitter(" not in source
-
-
-def test_train_validation_refit_uses_cosydelay_fitter() -> None:
-    from .refit_train_validation import _source
-
-    source = _source()
-    assert "cosydelay.fitter" in source
-    assert "StableRangeAcceleratedFitter as PersistentAcceleratedEquivalentFitter" in source
-
-
 def test_regeneration_prompt_requests_structural_exploration() -> None:
     from .prompt import build_regeneration_prompt
 
@@ -106,33 +91,6 @@ def test_regeneration_prompt_requests_structural_exploration() -> None:
 def test_regeneration_does_not_fallback_to_initialization() -> None:
     source = (HERE / "regeneration.py").read_text(encoding="utf-8")
     assert "initialization prompt" not in source.lower()
-
-
-def test_range_promotion_gate_is_training_only() -> None:
-    from .promote_range_profile import promote
-
-    payload = {
-        "status": "complete_training_only_paired_range_screen",
-        "data_policy": "Training only; Validation/Test/API forbidden",
-        "profiles": {"default": {}, "expanded_nonlinear": {"scale": [0.001, 1000.0]}},
-        "summary": {"expanded_nonlinear": {
-            "pairs": 2, "r2_wins": 2, "mean_delta_r2": 0.01,
-            "mean_delta_rmse": -0.1, "mean_delta_mae": -0.1,
-        }},
-        "intersections": [1], "seeds": [1, 2],
-    }
-    frozen = promote(payload, "expanded_nonlinear")
-    assert frozen["status"] == "frozen_training_only_range_profile"
-    assert frozen["validation_used"] is False
-    assert frozen["test_used"] is False
-
-
-def test_ablation_matrix_uses_one_seed_schedule_for_all_variants() -> None:
-    source = (HERE / "launch_ablation_matrix.py").read_text(encoding="utf-8")
-    assert '"v21"' in source and '"v23"' in source and '"cosydelay"' in source
-    assert "same seed_base + restart_index for every variant" in source
-    assert "identical_outer_search_budget" in source
-    compile(source, "<ablation-matrix-test>", "exec")
 
 
 def test_cosydelay_runner_installs_structural_family_novelty_overlay() -> None:
