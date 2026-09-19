@@ -16,8 +16,6 @@ data/
   locked_splits/           I1-I6 Train/Validation/Test JSONL split
   augmented_aasumo/        input-deduplicated oversaturation extension
   signal_optimization/     three third-party SingleTSCBaselines scenarios (data only)
-provenance/                schemas, counts, hashes, and data provenance
-scripts/                   convenience launch script for I1-I6
 ```
 
 The release contains only the CoSyDelay method implementation. Reviewer-only
@@ -61,12 +59,8 @@ python -u -m methods.cosydelay.run_p10g10_100 `
 ```
 
 Change `--intersection` to `1` through `6` and use a new output directory for
-each run. The default budget is P10/G10 (100 evaluated candidates). To launch
-the six intersections sequentially, use:
-
-```powershell
-.\scripts\run_cosydelay_i1_i6.ps1
-```
+each run. The default budget is P10/G10 (100 evaluated candidates). Run each
+intersection separately when reproducing the full I1-I6 protocol.
 
 For an offline import check (no API key required):
 
@@ -97,12 +91,11 @@ in `CITATIONS.md`.
 
 ## Data provenance and license
 
-See `provenance/DATASETS_USED.md`, `provenance/schema.json`,
-`provenance/provenance_gaps.md`, and `CITATIONS.md`.
-The original JSONL records are simulation-compatible records whose complete
-upstream simulator/field provenance was not documented in the source
-workspace; they must not be described as field observations without further
-evidence.
+The split and oversaturation directories contain their own manifests and
+protocol files. The original JSONL records are simulation-compatible records
+whose complete upstream simulator/field provenance was not documented in the
+source workspace; they must not be described as field observations without
+further evidence. See `CITATIONS.md` for third-party scenario attribution.
 
 The CoSyDelay source follows the included `LICENSE`. This does not
 automatically relicense the locked/augmented datasets, SUMO, or the upstream
