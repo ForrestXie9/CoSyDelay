@@ -21,4 +21,6 @@ python -u -m methods.cosydelay.run_p10g10_100 `
 
 Replace `1` with an intersection ID from `1` to `6`. The runner requires a
 locally supplied `LLM_API_KEY`; no credentials or generated run files are
-distributed.
+distributed. If an existing Windows/Anaconda installation reports an
+optional `gmpy2` DLL error, set `SYMPY_GROUND_TYPES=python` and
+`MPMATH_NOGMPY=1` before running.

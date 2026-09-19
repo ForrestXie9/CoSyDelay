@@ -37,7 +37,17 @@ $env:PYTHONPATH = (Resolve-Path .\code).Path
 ```
 
 The LLM search needs a locally configured `LLM_API_KEY`. Credentials are not
-stored in this repository.
+stored in this repository. On Windows/Anaconda installations with an
+incompatible optional `gmpy2` DLL, force both SymPy and mpmath to use
+pure-Python arithmetic before running the package:
+
+```powershell
+$env:SYMPY_GROUND_TYPES = "python"
+$env:MPMATH_NOGMPY = "1"
+```
+
+This setting is not needed in a clean virtual environment created from the
+provided requirements.
 
 ## Run the method
 
