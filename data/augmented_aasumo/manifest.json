@@ -1,7 +1,7 @@
 {
   "status": "preliminary_same_layout_stress_test",
   "claim_boundary": "Frozen CoSyDelay evaluated without refitting on input-deduplicated additional rows from the same six intersection layouts. This is not unseen-layout or external validation.",
-  "source": "Z:\\CoSydelay\\AASumo-I1to6_AllSites-14220.csv",
+  "source": "AASumo-I1to6_AllSites-14220.csv",
   "source_sha256": "b5f4d44188c3f0f397b497ad7545e1a701b7ace02779f31f3780edbf14d9f234",
   "source_data_rows": 14219,
   "source_columns": 57,
@@ -31,8 +31,7 @@
     "distance": "Chebyshev distance",
     "space": "active movement q/1800, active phase green ratios, and Cycle_Time/180"
   },
-  "frozen_model_root": null,
-  "frozen_model_artifact": "not redistributed; this directory contains only frozen-model evaluation outputs",
+  "frozen_model_artifact": "not redistributed; this directory contains input data and curation metadata only",
   "refit_or_selection_on_extension": false,
   "audit_totals": {
     "source_rows": 14219,
@@ -50,9 +49,17 @@
     "oversaturated": 3648,
     "severe_x_ge_1.30": 3235
   },
-  "outputs": {
-    "audit": "overlap_and_regime_audit.csv",
-    "metrics": "cosydelay_frozen_metrics.csv",
-    "candidate_rows": "deduplicated_candidate_rows_with_predictions.csv"
-  }
+  "distributed_files": [
+    "AASumo-I1to6_AllSites-14220.csv",
+    "manifest.json",
+    "protocol.json",
+    "README.md"
+  ],
+  "omitted_generated_outputs": [
+    "predictions",
+    "metrics",
+    "audits",
+    "bootstrap_intervals",
+    "search_logs"
+  ]
 }

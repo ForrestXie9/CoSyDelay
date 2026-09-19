@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Mapping, Optional
 
-from methods.cosydelay_v21_global_selection import prompt as v21
+from methods.cosydelay_v21_global_selection import prompt as base_prompt
 
 
 def build_init_prompt(
@@ -15,7 +15,7 @@ def build_init_prompt(
     prompt_style: str = "standard",
 ) -> str:
     """Build the fixed initialization prompt."""
-    return v21.build_init_prompt(
+    return base_prompt.build_init_prompt(
         feature_explanations,
         universal_features,
         intersection_id,
@@ -37,7 +37,7 @@ def build_regeneration_prompt(
     search_feedback: Optional[str] = None,
 ) -> str:
     """Request structural exploration without prescribing a formula family."""
-    value = v21.build_regeneration_prompt(
+    value = base_prompt.build_regeneration_prompt(
         base_expr,
         base_thought,
         base_explanation,

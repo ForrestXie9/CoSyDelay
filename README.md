@@ -1,55 +1,49 @@
-# CoSyDelay reproducible release
+# CoSyDelay
 
-This repository is a copy-only release of the final CoSyDelay symbolic
-traffic-delay method. It is deliberately separate from the research workspace
-used to run experiments; preparing or using this release does not modify that
-workspace.
+CoSyDelay is a symbolic traffic-delay model. This repository is the clean
+distribution of the method: source modules, the locked data used by the
+method, the oversaturation extension, and three clearly attributed junction
+scenario packages.
 
-## Release contents
+No search logs, experiment outputs, result tables, API keys, or historical
+variant folders are part of the release.
+
+## Repository layout
 
 ```text
 code/
-  methods/cosydelay/       public CoSyDelay search, fitter, prompts, and tests
-  methods/_runtime/        packaged preprocessing, physics, optimization, and LLM runtime
-  methods/_compat/         private compatibility modules required by the final method
+  methods/cosydelay/       public method entry point and command line runner
+  methods/_runtime/        data, physics, optimization, and LLM support modules
+  methods/_compat/         internal compatibility modules required at runtime
 data/
-  locked_splits/           I1-I6 Train/Validation/Test JSONL split
-  augmented_aasumo/        input-deduplicated oversaturation extension
-  signal_optimization/     three third-party SingleTSCBaselines scenarios (data only)
+  locked_splits/           I1-I6 Training/Validation/Test JSONL files
+  augmented_aasumo/        supplied same-layout oversaturation input data
+  signal_optimization/     three attributed SingleTSCBaselines scenarios
 ```
 
-The release contains only the CoSyDelay method implementation. Reviewer-only
-experiment runners, historical standalone method folders, and the SUMO/TSO
-execution code are not included. The signal-optimization directory contains
-scenario data for reproducibility; it does not contain a signal controller or
-simulation runner. See `CITATIONS.md` and the included upstream `NOTICE.md`
-before redistributing those third-party files.
+`methods/_runtime/` and `methods/_compat/` are implementation dependencies;
+they are not separate methods or experimental variants. The public interface
+is only `methods.cosydelay`.
 
-The original `data/original_jsonl/` records, API keys, generated search
-histories, caches, and large result tables are not redistributed. The locked
-I1-I6 split is included so the reported protocol can be reproduced directly.
+## Installation
 
-## Environment
-
-Use Python 3.11 or newer (pinned versions are listed in
-`requirements-lock.txt`):
+Python 3.11 or newer is recommended. From the repository root:
 
 ```powershell
-Set-Location "<path>\CoSyDelay_OpenSource"
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements-lock.txt
 $env:PYTHONPATH = (Resolve-Path .\code).Path
 ```
 
-LLM searches require a locally supplied `LLM_API_KEY`. The packaged example
-file is a template only; never commit credentials.
+The LLM search needs a locally configured `LLM_API_KEY`. Credentials are not
+stored in this repository.
 
-## Run CoSyDelay
+## Run the method
 
-The formal protocol uses the fixed Training/Validation/Test split. Structures
-and coefficients are selected using Training and Validation only; Test is read
-after the model is frozen.
+The runner uses the locked Training/Validation/Test split. Candidate
+structures and parameters are selected without reading Test; Test is evaluated
+only after the model is frozen.
 
 ```powershell
 python -u -m methods.cosydelay.run_p10g10_100 `
@@ -58,45 +52,42 @@ python -u -m methods.cosydelay.run_p10g10_100 `
   --output .\runs\cosydelay_i1
 ```
 
-Change `--intersection` to `1` through `6` and use a new output directory for
-each run. The default budget is P10/G10 (100 evaluated candidates). Run each
-intersection separately when reproducing the full I1-I6 protocol.
+Use an intersection ID from `1` to `6` and a separate output directory for
+each run. The default search budget is P10/G10 (100 evaluated candidates).
+Generated runs remain local and are ignored by Git.
 
-For an offline import check (no API key required):
+For an offline import check (no API key and no search):
 
 ```powershell
 python -c "import methods.cosydelay.fitter; import expression_rules; print('CoSyDelay import OK')"
 ```
 
-## Oversaturation extension
+## Included data
 
-`data/augmented_aasumo/` contains the input-deduplicated AASUMO extension for
-I1-I6. Rows with maximum degree of saturation `x >= 1.0` are evaluated after
-CoSyDelay is frozen. No refitting, selection, or tuning is performed on these
-rows. See its `README.md` and `protocol.json` for hashes and the audit protocol.
+### Locked splits
 
-## Signal-optimization scenarios
+`data/locked_splits/` contains the six intersection-specific Training,
+Validation, and Test JSONL files, together with the frozen split manifest.
+Validation is separate from Training and Test is not used for selection.
 
-Only three data-only junction scenarios from
-[Traffic-Alpha/SingleTSCBaselines](https://github.com/Traffic-Alpha/SingleTSCBaselines)
-are included:
+### Oversaturation input
 
-- `Beijing_Gaojiaoyuan`
-- `Chengdu_Guanghua`
-- `Tianjin_zhijingdao`
+`data/augmented_aasumo/AASumo-I1to6_AllSites-14220.csv` is the supplied
+same-layout extension used to stress-test the frozen method at high demand.
+`manifest.json` and `protocol.json` describe its construction and claim
+boundary. The release includes the input and metadata only, not predictions,
+metrics, audits, or bootstrap output.
 
-No SUMO/TraCI or TSO runner is part of this release. To replay these scenarios,
-install and use the upstream tooling separately, and cite the sources listed
-in `CITATIONS.md`.
+### Signal scenarios
 
-## Data provenance and license
+`data/signal_optimization/SingleTSCBaselines/` contains data-only scenarios
+for Beijing_Gaojiaoyuan, Chengdu_Guanghua, and Tianjin_zhijingdao. These are
+third-party network and route assets; this repository does not include a SUMO,
+TraCI, or signal-optimization runner. See `CITATIONS.md` and the local
+`NOTICE.md` before redistributing them.
 
-The split and oversaturation directories contain their own manifests and
-protocol files. The original JSONL records are simulation-compatible records
-whose complete upstream simulator/field provenance was not documented in the
-source workspace; they must not be described as field observations without
-further evidence. See `CITATIONS.md` for third-party scenario attribution.
+## License and citation
 
-The CoSyDelay source follows the included `LICENSE`. This does not
-automatically relicense the locked/augmented datasets, SUMO, or the upstream
-SingleTSCBaselines scenarios; verify their terms before redistribution.
+See `LICENSE` for the CoSyDelay source license and `CITATIONS.md` for the
+method citation and third-party scenario attribution. The included datasets
+and third-party scenario files may have separate terms.

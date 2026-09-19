@@ -4,15 +4,10 @@
   "deduplication": "strict_candidate: exact locked-union overlap removed and near distance > 0.02",
   "model": "frozen CoSyDelay expressions and coefficients",
   "refit_selection_or_tuning": false,
-  "source_csv": "Z:\\CoSydelay\\AASumo-I1to6_AllSites-14220.csv",
+  "source_csv": "AASumo-I1to6_AllSites-14220.csv",
   "source_sha256": "b5f4d44188c3f0f397b497ad7545e1a701b7ace02779f31f3780edbf14d9f234",
-  "upstream_audit_manifest": "embedded release audit: manifest.json and overlap_and_regime_audit.csv",
+  "curation_metadata": "manifest.json",
   "n_rows": 3644,
-  "bootstrap": {
-    "draws": 2000,
-    "seed": 20260912,
-    "unit": "complete timing plan within intersection",
-    "interval": "2.5th and 97.5th percentiles"
-  },
-  "claim_boundary": "same six layouts; not unseen-layout or external validation"
+  "claim_boundary": "same six layouts; not unseen-layout or external validation",
+  "distributed_artifacts": "input CSV and metadata only; no generated evaluation outputs"
 }

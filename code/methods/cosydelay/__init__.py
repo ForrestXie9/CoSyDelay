@@ -1,1 +1,1 @@
-"""CoSyDelay experimental overlay: uniform restarts and broad regeneration."""
+"""Public CoSyDelay symbolic traffic-delay method package."""

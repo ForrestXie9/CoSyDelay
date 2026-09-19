@@ -89,7 +89,7 @@ def accelerated_fit_supervisor_main(connection, static_kwargs: dict, settings: d
                     )
                 scrub_legacy_probe_fields(diagnostics)
                 # Preserve an explicit provenance marker at the supervisor
-                # boundary.  The V18 guarded wrapper serializes this
+                # boundary. The guarded wrapper serializes this
                 # dictionary unchanged; recording it here makes the CoSyDelay
                 # post-run audit robust even when an inner compatibility
                 # layer replaces the diagnostics object.

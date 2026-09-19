@@ -1,7 +1,0 @@
-intersection,site_name,source_rows,locked_train,locked_validation,locked_test,exact_locked_overlap,deduplicated_candidates,near_duplicate_le_0.02,strict_candidates,timing_unseen_vs_train,timing_unseen_vs_any_locked,undersaturated,near_capacity,oversaturated,severe_x_ge_1.30
-I1,withoutShortLanes,2504,1009,242,503,1754,750,1,749,358,268,0,0,750,674
-I2,withShortLanes,2503,1027,223,503,1753,750,1,749,367,268,0,1,749,692
-I3,site1,2177,934,284,438,1656,521,0,521,192,135,4,3,514,492
-I4,site2,2501,987,264,501,1752,749,0,749,89,62,45,26,678,590
-I5,site3,2051,966,240,412,1618,433,0,433,92,64,6,7,420,410
-I6,site4,2483,986,259,496,1741,742,3,739,4,3,139,66,537,377

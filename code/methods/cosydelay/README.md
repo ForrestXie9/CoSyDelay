@@ -1,17 +1,15 @@
-# CoSyDelay method
+# CoSyDelay method package
 
-This directory is the public entry point for the released CoSyDelay symbolic
-traffic-delay method. The search uses the fixed Training/Validation/Test
-protocol, a P10/G10 candidate budget, training-only parameter fitting and
-selection, physical admissibility checks, and a final frozen Test evaluation.
+This directory is the public Python entry point for the CoSyDelay symbolic
+traffic-delay method.
 
-The implementation-specific runtime modules are kept under
-`methods/_runtime/` and `methods/_compat/`; those directories are private
-support code, not additional public methods or reviewer experiments.
+The implementation uses the fixed Training/Validation/Test protocol, a
+P10/G10 candidate budget, training-only fitting and selection, traffic-physics
+checks, and a frozen Test evaluation. Internal support code lives in
+`methods/_runtime/` and `methods/_compat/`; those directories are dependencies
+of this package, not additional methods.
 
-## Run one intersection
-
-From the repository root:
+Run from the repository root:
 
 ```powershell
 $env:PYTHONPATH = (Resolve-Path .\code).Path
@@ -21,6 +19,6 @@ python -u -m methods.cosydelay.run_p10g10_100 `
   --output .\runs\cosydelay_i1
 ```
 
-Use a different intersection ID (`1`-`6`) and output directory for each run.
-The LLM interface reads a locally supplied `LLM_API_KEY`; credentials are never
-part of this release.
+Replace `1` with an intersection ID from `1` to `6`. The runner requires a
+locally supplied `LLM_API_KEY`; no credentials or generated run files are
+distributed.
