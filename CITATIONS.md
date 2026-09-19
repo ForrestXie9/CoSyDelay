@@ -19,6 +19,12 @@ Only `Beijing_Gaojiaoyuan`, `Chengdu_Guanghua`, and `Tianjin_zhijingdao` are
 included in this bundle. The other upstream scenarios and generated result
 tables are intentionally omitted.
 
+The benchmark environment is built on TransSimHub. For the associated
+platform paper, cite M. Wang et al., “TranSimHub: A Unified Air-Ground
+Simulation Platform for Multi-Modal Perception and Decision-Making,” arXiv
+preprint arXiv:2510.15365 (2025),
+[doi:10.48550/arXiv.2510.15365](https://doi.org/10.48550/arXiv.2510.15365).
+
 ## SUMO
 
 The signal replay uses Eclipse SUMO and TraCI. Cite:
