@@ -1,9 +1,9 @@
-# Frozen V22 oversaturated same-layout generalization test
+# Frozen CoSyDelay oversaturated same-layout generalization test
 
 This experiment uses only strict additional rows with maximum degree of
 saturation x >= 1.0. All exact model-input overlaps with the locked
 Training/Validation/Test union and five near-duplicate sensitivity rows
-were removed upstream. V22 was frozen; no refitting, selection, or tuning
+were removed upstream. CoSyDelay was frozen; no refitting, selection, or tuning
 used these rows.
 
 This is a same-layout oversaturation stress test, not unseen-intersection

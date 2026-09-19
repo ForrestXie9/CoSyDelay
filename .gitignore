@@ -13,7 +13,6 @@ runs/
 
 # Deliberately excluded from the GitHub release
 data/original_jsonl/
-data/locked_splits/
 data/external_transfer/
 data/variants/
 data/signal_optimization/formal_model/
@@ -23,6 +22,18 @@ data/signal_optimization/results.csv
 data/signal_optimization/scenario_audit.json
 data/signal_optimization/summary*.csv
 data/signal_optimization/SingleTSCBaselines/README.md
+
+# Historical/experimental copies retained only in the local preparation tree
+code/methods/cosydelay_v[0-9]*/
+code/methods/cosydelay_lbfgsb_r10_parallel3/
+code/methods/cosydelay_lbfgsb_r10_parallel4/
+code/methods/cosydelay_lbfgsb_r10_parallel4_v4_single_evolution/
+code/methods/cosydelay_lbfgsb_r10_parallel4_v5_prefit_r3_r9/
+code/methods/prospective_*/
+code/methods/launch_structural_prompt_screen.py
+code/methods/restart_strategy_adapters_v1.py
+code/methods/structural_prompt_variant_runner_v1.py
+code/methods/test_structural_prompt_variants_v1.py
 
 # Local notebooks/editors
 .venv/

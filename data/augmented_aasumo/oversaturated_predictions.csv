@@ -1,4 +1,4 @@
-intersection_id,SiteName,source_row,timing_plan_key,timing_seen_in_train,max_degree_of_saturation,severity,observed_weighted_delay,v22_predicted_weighted_delay,v22_error
+intersection_id,SiteName,source_row,timing_plan_key,timing_seen_in_train,max_degree_of_saturation,severity,observed_weighted_delay,cosydelay_predicted_weighted_delay,cosydelay_error
 1,withoutShortLanes,2,90.0|A:14.0|B:38.0|C:6.0|D:8.0,True,1.2736842105263158,moderate_1.0_le_x_lt_1.3,32.001105263157896,32.14268506535714,0.1415798021992458
 1,withoutShortLanes,3,120.0|A:23.0|B:57.0|C:6.0|D:10.0,False,1.536842105263158,severe_x_ge_1.3,38.02620689655172,39.6364004171953,1.610193520643584
 1,withoutShortLanes,11,80.0|A:11.0|B:33.0|C:6.0|D:6.0,False,1.2,moderate_1.0_le_x_lt_1.3,32.01402366863906,29.520069462445164,-2.493954206193898

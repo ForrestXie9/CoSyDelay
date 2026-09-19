@@ -16,7 +16,8 @@ ALLOWED_FUNCTION_NAMES = ("exp", "log")
 MAX_EXPRESSION_NODES = 90
 MAX_EXPRESSION_CHARACTERS = 2000
 MAX_PYTHON_AST_NODES = 256
-# Match V22 search: no artificial a1-a8 cap; only the expression-complexity bound.
+# Match the final CoSyDelay search: no artificial a1-a8 cap; only the
+# expression-complexity bound.
 MAX_COEFFICIENTS = MAX_PYTHON_AST_NODES
 MAX_ABS_NUMERIC_LITERAL = 1_000_000.0
 PREFIT_FLOW_POINTS = (0.0, 0.01, 0.5, 1.0, 2.0)

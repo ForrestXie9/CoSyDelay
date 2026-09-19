@@ -42,18 +42,18 @@ BOUND_OVERRIDES = {
 }
 
 DISPLAY_NAMES = {
-    "v22": "CoSyDelay-V22",
+    "cosydelay": "CoSyDelay",
     ("webster", "variant1"): "Webster-optimized",
     ("hcm", "variant1"): "HCM-optimized",
     ("akcelik", "variant1"): "Akcelik-optimized",
 }
 
-DEFAULT_V22_ROOT = (
+DEFAULT_CoSyDelay_ROOT = (
     Path(__file__).resolve().parents[2]
     / "methods"
-    / "cosydelay_v22_stable_regeneration"
+    / "cosydelay"
     / "experiments"
-    / "v22_i1_i6_single_20260826_195254"
+    / "cosydelay_i1_i6_single_20260826_195254"
 )
 # In the release bundle the reproducible three-way split is the default.  A
 # caller can still pass another directory explicitly to ``load_train_test``.
@@ -211,12 +211,12 @@ def fit_classic_model(
     )
 
 
-def load_v22_model(intersection_id: int, search_root: Path = DEFAULT_V22_ROOT) -> DelayModel:
+def load_cosydelay_model(intersection_id: int, search_root: Path = DEFAULT_CoSyDelay_ROOT) -> DelayModel:
     result_path = search_root / f"intersection_{intersection_id:02d}" / "run_01" / "result.json"
     payload = json.loads(result_path.read_text(encoding="utf-8"))
     lanes, mapping = lanes_for(intersection_id)
     return DelayModel(
-        name=DISPLAY_NAMES["v22"],
+        name=DISPLAY_NAMES["cosydelay"],
         expression=str(payload["selected_expression"]),
         lane_parameters=payload["selected_parameters"],
         lanes=tuple(lanes),
@@ -257,14 +257,14 @@ def predicted_weighted_delay(
 def build_models(
     intersection_id: int,
     train: pd.DataFrame,
-    v22_root: Path,
+    cosydelay_root: Path,
     classics: Sequence[Tuple[str, str]] = (
         ("hcm", "variant1"),
         ("akcelik", "variant1"),
         ("webster", "variant1"),
     ),
 ) -> List[DelayModel]:
-    models = [load_v22_model(intersection_id, v22_root)]
+    models = [load_cosydelay_model(intersection_id, cosydelay_root)]
     for method, variant in classics:
         models.append(fit_classic_model(intersection_id, train, method, variant))
     return models

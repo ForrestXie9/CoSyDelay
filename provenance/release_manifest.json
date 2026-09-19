@@ -1,8 +1,8 @@
 {
   "bundle": "CoSyDelay_OpenSource",
-  "method": "CoSyDelay V22 stable regeneration",
+  "method": "CoSyDelay",
   "source_workspace_unchanged": true,
-  "code_entrypoint": "code/methods/cosydelay_v22_stable_regeneration",
+  "code_entrypoint": "code/methods/cosydelay",
   "raw_data": {
     "path": "data/original_jsonl",
     "intersections": "I1-I9",
@@ -11,14 +11,14 @@
     "test_records": 4107
   },
   "locked_split": {
-    "path": "local-only/data/locked_splits",
+    "path": "data/locked_splits",
     "seed": 20260712,
     "intersections": "I1-I6",
     "train_records": 5909,
     "validation_records": 1512,
     "test_records": 2853,
     "test_reused_from_original": true,
-    "redistributed": false
+    "redistributed": true
   },
   "auxiliary_variants": {
     "short_lanes": "data/variants/short_lanes",
@@ -44,7 +44,7 @@
     "API keys and local secrets",
     "Python caches and logs",
     "generated search histories and large experiment outputs",
-    "original and locked JSONL records",
+    "original JSONL records",
     "redistribution-sensitive NGSIM/DLR raw files"
   ]
 }

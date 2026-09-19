@@ -13,8 +13,8 @@ HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
-from run_v22_six_classics_true_tso import _load_specs, _plan  # noqa: E402
-from run_v22_true_tso import (  # noqa: E402
+from run_cosydelay_six_classics_true_tso import _load_specs, _plan  # noqa: E402
+from run_cosydelay_true_tso import (  # noqa: E402
     SIGNAL_EXPERIMENT,
     _run_controller,
     _sha256,
@@ -28,7 +28,7 @@ DEFAULT_PATTERNS = (
     "increasing_demand", "random_perturbation",
 )
 DEFAULT_CONTROLLERS = (
-    "v22", "webster", "webster-optimized", "hcm", "hcm-optimized",
+    "cosydelay", "webster", "webster-optimized", "hcm", "hcm-optimized",
     "akcelik", "akcelik-optimized",
 )
 
@@ -56,7 +56,7 @@ def _write_summary(rows: list[dict], output_dir: Path) -> None:
 
 def run(args: argparse.Namespace) -> int:
     specs = _load_specs()
-    v22_model = __import__("experiment.controllers", fromlist=["require_formal_matrix_model"]).require_formal_matrix_model(
+    cosydelay_model = __import__("experiment.controllers", fromlist=["require_formal_matrix_model"]).require_formal_matrix_model(
         SIGNAL_EXPERIMENT / "models" / "symbolic_lane_model.json"
     )
     unknown = [key for key in args.controllers if key not in specs]
@@ -69,7 +69,7 @@ def run(args: argparse.Namespace) -> int:
         for pattern in args.patterns:
             env_name = f"{args.difficulty}_{pattern}"
             scenario = load_scenario(junction, env_name)
-            plans = {key: _plan(key, specs[key], scenario, v22_model) for key in args.controllers}
+            plans = {key: _plan(key, specs[key], scenario, cosydelay_model) for key in args.controllers}
             scenario_audit.append({
                 "junction": junction,
                 "env_name": env_name,
@@ -118,8 +118,8 @@ def run(args: argparse.Namespace) -> int:
         "controllers": args.controllers,
         "seeds": args.seeds,
         "classical_fit_source": "original Intersection-1 Train split only",
-        "v22_model": str((SIGNAL_EXPERIMENT / "models" / "symbolic_lane_model.json").resolve()),
-        "v22_model_sha256": _sha256(SIGNAL_EXPERIMENT / "models" / "symbolic_lane_model.json"),
+        "cosydelay_model": str((SIGNAL_EXPERIMENT / "models" / "symbolic_lane_model.json").resolve()),
+        "cosydelay_model_sha256": _sha256(SIGNAL_EXPERIMENT / "models" / "symbolic_lane_model.json"),
         "results": str(results_path.resolve()),
         "summary": str((args.output_dir / "summary.csv").resolve()),
         "summary_by_junction": str((args.output_dir / "summary_by_junction.csv").resolve()),

@@ -1,39 +1,35 @@
-# CoSyDelay V22 — reproducible open-source bundle
+# CoSyDelay — reproducible open-source bundle
 
-This directory is a clean, copy-only release bundle for the CoSyDelay V22
-symbolic traffic-delay method.  The original research workspace was not
-modified.  The bundle contains source code, the raw I1–I9 records, the locked
-I1–I6 three-way split, the AASUMO augmented/oversaturated data, and the three
-open SUMO junction scenarios used by the signal-optimization (TSO) adapter.
+This directory is a copy-only release of the final CoSyDelay symbolic
+traffic-delay method. The original research workspace is not modified. The
+bundle contains the method implementation, the fixed I1–I6 data split, the
+same-layout oversaturation extension, and three reproducible SUMO signal
+optimization scenarios.
 
-## Contents
+## Layout
 
 ```text
 code/
-  *.py, llm/                         core preprocessing and LLM interface
-  methods/                           V22 and supporting method modules
-  signal_optimization_experiment/   SUMO/TSO controllers and tests
-  reviewer_revision_experiments/   portable TSO runners and fitting helpers
+  *.py, llm/                         preprocessing and LLM interface
+  methods/cosydelay/                 final CoSyDelay search and fitter
+  methods/                            supporting historical/ablation modules
+  signal_optimization_experiment/   SUMO/TSO controllers and model adapter
+  reviewer_revision_experiments/    evaluation and TSO runners
 data/
-  augmented_aasumo/                 AASUMO source and oversaturated cohort
+  locked_splits/                    I1–I6 Train/Validation/Test JSONL
+  augmented_aasumo/                 input-deduplicated oversaturation data
   signal_optimization/              three selected SingleTSCBaselines cases
-provenance/                          dataset schema, counts, hashes, protocol
-requirements*.txt                    pinned Python dependencies
+provenance/                          schemas, counts, hashes, and citations
+scripts/                             convenience launch scripts
 ```
 
-Generated search histories, caches, logs, and API keys are intentionally not
-included.  Historical method folders are source-only; the recommended method
-is `methods.cosydelay_v22_stable_regeneration`.
-
-The GitHub release intentionally omits the original JSONL records, the locked
-Train/Validation/Test JSONL copies, external NGSIM/DLR files, short-lane
-variants, and previously generated TSO result tables.  The local preparation
-directory may still contain those untracked copies, but they are excluded from
-the commit.
+The original `data/original_jsonl/` records, API keys, generated search
+histories, caches, and large result tables are not redistributed. The locked
+I1–I6 split is included so the reported protocol can be reproduced directly.
 
 ## Environment
 
-Use Python 3.11+ (the pinned versions are in `requirements-lock.txt`):
+Use Python 3.11+ (pinned versions are listed in `requirements-lock.txt`):
 
 ```powershell
 Set-Location "<path>\CoSyDelay_OpenSource"
@@ -43,43 +39,61 @@ python -m pip install -r requirements-lock.txt
 $env:PYTHONPATH = (Resolve-Path .\code).Path
 ```
 
-LLM searches require a locally supplied `LLM_API_KEY`.  Copy
-`code/llm_keys.local.example.json` to `code/llm_keys.local.json` only on a
-private machine, or set the environment variable directly.  The local file is
-ignored by `.gitignore` and must never be committed.
+LLM searches require a locally supplied `LLM_API_KEY`. The example key file is
+only a template; do not commit credentials.
 
-## Run one V22 search
+## Run CoSyDelay
 
-The formal experiments use a Training → Validation → Test split; the data files
-are deliberately not redistributed in this release.  To run a search, place
-an authorized copy of the split under `data/locked_splits/` (or pass another
-directory with the same `Intersection_<id>_{Train,Validation,Test}.jsonl`
-names), then run:
+The formal protocol uses the fixed Training/Validation/Test split. The search
+selects structures and parameters using Training and Validation only; Test is
+read after the model is frozen.
 
 ```powershell
-python -u -m methods.cosydelay_v22_stable_regeneration.run_p10g10_100 `
+python -u -m methods.cosydelay.run_p10g10_100 `
   --intersection 1 `
   --data-dir .\data\locked_splits `
-  --output .\runs\v22_i1
+  --output .\runs\cosydelay_i1
 ```
 
 Change `--intersection` to 1–6 and use a new output directory for each run.
-The run uses the V22 P10/G10 budget (10 initial candidates plus 9 regeneration
-rounds, 100 evaluated candidates) and writes results only under `runs/`.
+The default experiment budget is P10/G10 (100 evaluated candidates).
 
-Without an API key, the lightweight import/fitter checks can be run with:
+For all six intersections, use:
 
 ```powershell
-python -c "import constants, data_processing; import methods.cosydelay_v22_stable_regeneration.fitter; print('CoSyDelay V22 import OK')"
+.\scripts\run_cosydelay_i1_i6.ps1
 ```
 
-## Signal-optimization (TSO) replay
+Without an API key, a lightweight import check is sufficient:
 
-The TSO adapter replays fixed plans in SUMO on the three bundled compatible
-SingleTSCBaselines junctions: Beijing_Gaojiaoyuan, Chengdu_Guanghua, and
-Tianjin_zhijingdao.  Vehicle trajectories and delay outcomes are generated by
-SUMO; these are open network scenarios, not field-observation labels.  SUMO
-and its TraCI Python bindings must be installed separately.
+```powershell
+python -c "import constants, data_processing; import methods.cosydelay.fitter; print('CoSyDelay import OK')"
+```
+
+## Oversaturation extension
+
+`data/augmented_aasumo/` contains the input-deduplicated AASUMO extension for
+I1–I6. It is a same-layout stress test: rows with maximum degree of saturation
+`x >= 1.0` are evaluated after CoSyDelay is frozen. No refitting, selection, or
+tuning is performed on these rows. See its `README.md` and
+`protocol.json` for hashes and the exact audit protocol.
+
+## Signal-optimization replay
+
+The bundled TSO adapter replays fixed timing plans in SUMO on these three
+SingleTSCBaselines junctions:
+
+- `Beijing_Gaojiaoyuan`
+- `Chengdu_Guanghua`
+- `Tianjin_zhijingdao`
+
+Vehicle trajectories and delay outcomes in this part are generated by SUMO;
+they are not field-observation labels. SUMO and TraCI must be installed
+separately. The scenarios originate from the upstream
+[`Traffic-Alpha/SingleTSCBaselines`](https://github.com/Traffic-Alpha/SingleTSCBaselines)
+repository (revision `3147aa9aef16e5c78f83a557d2935a41c1fde079`). See
+`data/signal_optimization/SingleTSCBaselines/NOTICE.md` and `CITATIONS.md` for
+attribution, license, and the SUMO citation.
 
 Example smoke run:
 
@@ -87,38 +101,22 @@ Example smoke run:
 python -u .\code\reviewer_revision_experiments\20_singletscbaselines_tso\run_batch_true_tso.py `
   --junctions Beijing_Gaojiaoyuan `
   --patterns low_density `
-  --controllers v22 webster `
+  --controllers cosydelay webster `
   --seeds 1 `
   --output-dir .\runs\tso_smoke
 ```
 
-The GitHub release includes only the three selected junction directories under
-`data/signal_optimization/SingleTSCBaselines/junction_scenarios/`.  Previously
-generated 20-seed result tables remain local and are not uploaded.  Rerunning
-the adapter creates a new output directory and does not overwrite source data.
+## Data provenance
 
-## Data and provenance
-
-See `provenance/DATASETS_USED.md` for the full data protocol, sample counts,
-split rules, external-transfer notes, and target-generation caveats.
-The three files under `data/variants/short_lanes/` are an auxiliary short-lane
-variant retained for the geometry-sensitivity experiment; they are not part of
-the locked V22 main split.
-`provenance/dataset_manifest.csv`, `schema.json`, and `hashes.sha256` provide
-machine-readable audit information.  In particular, the original JSONL data
-are simulation-compatible records; their upstream simulator/field provenance
-was not fully documented in the source workspace and should not be described
-as field observations without additional evidence.
-
-The AASUMO CSV is copied with SHA-256
-`b5f4d44188c3f0f397b497ad7545e1a701b7ace02779f31f3780edbf14d9f234`.
-External NGSIM/DLR raw files are not redistributed here; only their transfer
-manifests are included, so upstream licenses and download terms remain clear.
+See `provenance/DATASETS_USED.md`, `provenance/dataset_manifest.csv`,
+`provenance/schema.json`, `provenance/hashes.sha256`, and `CITATIONS.md`.
+The original JSONL records are simulation-compatible records whose complete
+upstream simulator/field provenance was not documented in the source
+workspace; they must not be described as field observations without further
+evidence.
 
 ## License
 
-The bundled CoSyDelay source follows the included `LICENSE` (MIT, copyright
-notice retained from the research workspace).  This does not automatically
-license the raw datasets, upstream SUMO scenarios, or third-party dependencies;
-see `LICENSE_PLACEHOLDER.md` and verify their terms before publishing a public
-archive.
+The CoSyDelay source follows the included `LICENSE`. This does not
+automatically relicense the locked/augmented datasets, SUMO, or the upstream
+SingleTSCBaselines scenarios; verify their terms before redistribution.

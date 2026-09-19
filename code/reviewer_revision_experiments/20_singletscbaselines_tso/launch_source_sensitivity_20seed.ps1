@@ -8,7 +8,7 @@ $ErrorActionPreference = "Stop"
 $PackageRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path
 Set-Location $PackageRoot
 $python = (Get-Command python -ErrorAction Stop).Source
-$runner = Join-Path $PSScriptRoot 'run_frozen_v22_sources.py'
+$runner = Join-Path $PSScriptRoot 'run_frozen_cosydelay_sources.py'
 
 if ($WaitForPid -gt 0) {
     while (Get-Process -Id $WaitForPid -ErrorAction SilentlyContinue) {

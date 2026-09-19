@@ -1,0 +1,195 @@
+{
+  "schema_version": 1,
+  "split_seed": 20260712,
+  "validation_fraction_of_original_train": 0.2,
+  "fit_and_validation_are_never_recombined": true,
+  "test_used_for_selection": false,
+  "intersections": {
+    "1": {
+      "files": {
+        "train": {
+          "file": "Intersection_1_Train.jsonl",
+          "rows": 1009,
+          "sha256": "056b02344607f24da585b1043d7662cf66dd40fa3edaada8cf43118a9e1064d6"
+        },
+        "validation": {
+          "file": "Intersection_1_Validation.jsonl",
+          "rows": 242,
+          "sha256": "0c1e07a3d89c64295984eb80381bdbbbf622613a0a66f846e89a52364b3f0683"
+        },
+        "test": {
+          "file": "Intersection_1_Test.jsonl",
+          "rows": 503,
+          "sha256": "dde4a7ac552e5defe5549f7f054745393badad8d16f3aa2191359c5e5e30e077"
+        }
+      },
+      "unique_sample_hashes": {
+        "training": 1009,
+        "validation": 242,
+        "testing": 503
+      },
+      "overlap_counts": {
+        "training_validation": 0,
+        "training_testing": 0,
+        "validation_testing": 0
+      },
+      "source_train_sha256": "69d0e324960d08509bd87b4df7fac5bbb8c611bf6c5cffc0fbe63ba19c705d56",
+      "source_test_sha256": "dde4a7ac552e5defe5549f7f054745393badad8d16f3aa2191359c5e5e30e077"
+    },
+    "2": {
+      "files": {
+        "train": {
+          "file": "Intersection_2_Train.jsonl",
+          "rows": 1027,
+          "sha256": "23bc738f79ef9c0a861e4c845e3eb945eb50b3f22972185c99b4a1a9142ce3c7"
+        },
+        "validation": {
+          "file": "Intersection_2_Validation.jsonl",
+          "rows": 223,
+          "sha256": "91e0279688ceb2ef587a6691da6129a8ace7257c5535244c6ac0d8e2619efdd2"
+        },
+        "test": {
+          "file": "Intersection_2_Test.jsonl",
+          "rows": 503,
+          "sha256": "594bc42f16be55e98da050b0fffb5d9095f3b7097c39c67758db89b9c9974505"
+        }
+      },
+      "unique_sample_hashes": {
+        "training": 1027,
+        "validation": 223,
+        "testing": 503
+      },
+      "overlap_counts": {
+        "training_validation": 0,
+        "training_testing": 0,
+        "validation_testing": 0
+      },
+      "source_train_sha256": "395d60cec52fa13bc054aecaffb64cef1e293f4458e9d57b7263b8b2ea592b25",
+      "source_test_sha256": "594bc42f16be55e98da050b0fffb5d9095f3b7097c39c67758db89b9c9974505"
+    },
+    "3": {
+      "files": {
+        "train": {
+          "file": "Intersection_3_Train.jsonl",
+          "rows": 934,
+          "sha256": "45f1558c8140f59383ffde7e94ab737afaf83e75cb3042d69419f2b70fc78833"
+        },
+        "validation": {
+          "file": "Intersection_3_Validation.jsonl",
+          "rows": 284,
+          "sha256": "3e725754cd0cb1b520972fb4cb0e7acd393f43844803e06bb6dff5e4e7d6022a"
+        },
+        "test": {
+          "file": "Intersection_3_Test.jsonl",
+          "rows": 438,
+          "sha256": "26b9a44df8746a9cf4d69d214a38637d5efb507a7ee2e2793fd515a55685f5d5"
+        }
+      },
+      "unique_sample_hashes": {
+        "training": 934,
+        "validation": 284,
+        "testing": 438
+      },
+      "overlap_counts": {
+        "training_validation": 0,
+        "training_testing": 0,
+        "validation_testing": 0
+      },
+      "source_train_sha256": "d669f3fdb33ebae558992517197ce45c54e13c3c93728767e53640f42d0c7055",
+      "source_test_sha256": "26b9a44df8746a9cf4d69d214a38637d5efb507a7ee2e2793fd515a55685f5d5"
+    },
+    "4": {
+      "files": {
+        "train": {
+          "file": "Intersection_4_Train.jsonl",
+          "rows": 987,
+          "sha256": "1b526c1a55af9c49e1fc2047f07f1dbf7aa27f836e87644a60294da7c2018770"
+        },
+        "validation": {
+          "file": "Intersection_4_Validation.jsonl",
+          "rows": 264,
+          "sha256": "04652a676bb26fc04f6a5927c6cc3f918f630023d2d160cfbbfec09de8f20ac1"
+        },
+        "test": {
+          "file": "Intersection_4_Test.jsonl",
+          "rows": 501,
+          "sha256": "ffb3ef20a7d3c451d681ef40eb3ec01e7edafb91db7a62776c66c45fb41b8161"
+        }
+      },
+      "unique_sample_hashes": {
+        "training": 987,
+        "validation": 264,
+        "testing": 501
+      },
+      "overlap_counts": {
+        "training_validation": 0,
+        "training_testing": 0,
+        "validation_testing": 0
+      },
+      "source_train_sha256": "5da89836ba34777336100c8fed5cf5e8f92c3a37f9f0b667362abb72b047df22",
+      "source_test_sha256": "ffb3ef20a7d3c451d681ef40eb3ec01e7edafb91db7a62776c66c45fb41b8161"
+    },
+    "5": {
+      "files": {
+        "train": {
+          "file": "Intersection_5_Train.jsonl",
+          "rows": 966,
+          "sha256": "271e4e050a3d876251deb326abab8a686a510f16e68c280182748e5e966840e0"
+        },
+        "validation": {
+          "file": "Intersection_5_Validation.jsonl",
+          "rows": 240,
+          "sha256": "f2e3543d0137103f0326689e2c88181252f529261e4707d73f293781b98ad1b4"
+        },
+        "test": {
+          "file": "Intersection_5_Test.jsonl",
+          "rows": 412,
+          "sha256": "f424c4178bda7f480e748004d2592fcb0a26fd404dd5bc097dad05ae7ffa6b08"
+        }
+      },
+      "unique_sample_hashes": {
+        "training": 966,
+        "validation": 240,
+        "testing": 412
+      },
+      "overlap_counts": {
+        "training_validation": 0,
+        "training_testing": 0,
+        "validation_testing": 0
+      },
+      "source_train_sha256": "d7886967bf5c1157e844931aa97086be541bffd7774120da61a3e81e1a0bc731",
+      "source_test_sha256": "f424c4178bda7f480e748004d2592fcb0a26fd404dd5bc097dad05ae7ffa6b08"
+    },
+    "6": {
+      "files": {
+        "train": {
+          "file": "Intersection_6_Train.jsonl",
+          "rows": 986,
+          "sha256": "d0d8abcef8507f8fb7ad96ef5bb00974a98157219f3d5266f8ff64cda1db01e0"
+        },
+        "validation": {
+          "file": "Intersection_6_Validation.jsonl",
+          "rows": 259,
+          "sha256": "fe37d134c5d102ee1f62c67a5764f99d3e052f67b48bae0572cdf17ce8134b82"
+        },
+        "test": {
+          "file": "Intersection_6_Test.jsonl",
+          "rows": 496,
+          "sha256": "058ef55e31d87b4b316fe5c3366dcc02da5851ac4904c00f714a05bc62172d0f"
+        }
+      },
+      "unique_sample_hashes": {
+        "training": 986,
+        "validation": 259,
+        "testing": 496
+      },
+      "overlap_counts": {
+        "training_validation": 0,
+        "training_testing": 0,
+        "validation_testing": 0
+      },
+      "source_train_sha256": "09044495f83a4729dbb4c591dca2df7af42a76d10732ebfbef8bf251709378a6",
+      "source_test_sha256": "058ef55e31d87b4b316fe5c3366dcc02da5851ac4904c00f714a05bc62172d0f"
+    }
+  }
+}

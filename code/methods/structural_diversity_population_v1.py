@@ -67,7 +67,7 @@ _evolve.__globals__[_safe_generator_name] = wrap_without_history_prompt(
 )
 # Older integration layers access the generator as a module attribute rather
 # than through ``evolve_universal_lane_expression``'s globals. Export the
-# wrapped binding as well, so the V22 overlay remains API-compatible with the
+# wrapped binding as well, so the CoSyDelay overlay remains API-compatible with the
 # frozen V16--V21 execution stack.
 safe_generate_universal_lane_expression = _evolve.__globals__[_safe_generator_name]
 
