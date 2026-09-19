@@ -97,8 +97,8 @@ in `CITATIONS.md`.
 
 ## Data provenance and license
 
-See `provenance/DATASETS_USED.md`, `provenance/dataset_manifest.csv`,
-`provenance/schema.json`, `provenance/hashes.sha256`, and `CITATIONS.md`.
+See `provenance/DATASETS_USED.md`, `provenance/schema.json`,
+`provenance/provenance_gaps.md`, and `CITATIONS.md`.
 The original JSONL records are simulation-compatible records whose complete
 upstream simulator/field provenance was not documented in the source
 workspace; they must not be described as field observations without further
