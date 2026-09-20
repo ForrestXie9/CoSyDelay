@@ -1,4 +1,4 @@
-# CoSyDelay: Physics-Guided Symbolic Traffic-Delay Modeling
+# CoSyDelay: Cognitive Symbolic Regression for Traffic Delay Estimation
 
 CoSyDelay is a symbolic-learning method for estimating traffic delay at signalized intersections. Its goal is to learn a compact, readable delay equation from movement-level traffic data, while keeping the equation consistent with basic traffic principles.
 
