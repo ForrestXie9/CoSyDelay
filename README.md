@@ -10,18 +10,6 @@ The model uses three directly meaningful inputs for each movement:
 
 The released implementation is intended for movement-level delay modeling at the six intersections (`I1`-`I6`) supplied in the locked data split. It includes the original split, the supplied oversaturation extension, and three attributed signal-optimization scenarios.
 
-## How CoSyDelay works
-
-CoSyDelay combines language-model-assisted symbolic search with numerical fitting and explicit traffic-physics checks:
-
-1. The LLM proposes a symbolic structure, without proposing fitted coefficient values.
-2. The implementation parses and normalizes the expression, rejects unsupported or unsafe structures, and removes canonical duplicates.
-3. Positive movement-specific coefficients are fitted using the Training split only.
-4. Each fitted candidate is checked against the declared traffic principles, including required variables, flow and green-ratio monotonicity, time-unit consistency, non-negativity, low-demand behavior, and the zero-green limit.
-5. Candidates evolve through initialization and regeneration. Survivor selection uses the declared Training fitness, combining Training R-squared with the binary physical-compliance term.
-6. The best expression is retained as a compact, interpretable delay model. Validation and Test data are kept separate from the search and are not used to select candidates.
-
-The default search uses a population of 10 expressions and 9 evolutionary generations: 10 initial candidates plus 90 offspring, or 100 evaluated candidates in total. Generated runs, audit logs, and result files stay local and are ignored by Git.
 
 ## Repository structure
 
