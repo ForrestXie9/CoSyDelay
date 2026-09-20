@@ -48,12 +48,7 @@ The LLM search requires a provider key in the process environment. The key is ne
 
 ```powershell
 $env:LLM_API_KEY = "<your-provider-key>"
-```
-
-The default gateway settings are `llm-api.net` and `gpt-4.1-mini`. They can be overridden without editing source files:
-
-```powershell
-$env:LLM_API_ENDPOINT = "llm-api.net"
+$env:LLM_API_ENDPOINT = "< >"
 $env:LLM_MODEL = "gpt-4.1-mini"
 ```
 
