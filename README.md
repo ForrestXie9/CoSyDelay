@@ -95,6 +95,4 @@ python -c "import methods.cosydelay.fitter; import expression_rules; print('CoSy
 
 `data/signal_optimization/SingleTSCBaselines/` contains data-only scenarios for `Beijing_Gaojiaoyuan`, `Chengdu_Guanghua`, and `Tianjin_zhijingdao`. These are third-party network and route assets, not CoSyDelay data. See `CITATIONS.md` and the local `NOTICE.md` before redistributing or replaying them.
 
-## Citation and license
 
-Please cite the accompanying CoSyDelay paper and identify the released source revision used in an experiment. See `CITATIONS.md` for the method citation, the third-party scenario attribution, and the SUMO reference for any external replay. The included datasets and scenario files may have terms separate from the CoSyDelay source license; see `LICENSE` and the notices in the data directories.
