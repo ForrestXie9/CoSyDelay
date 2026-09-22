@@ -4,7 +4,7 @@ This directory is the public Python entry point for the CoSyDelay symbolic
 traffic-delay method.
 
 The implementation uses the fixed Training/Validation/Test protocol, a
-P10/G10 candidate budget, training-only fitting and selection, traffic-physics
+configurable population/generation budget (default P=10, G=10), training-only fitting and selection, traffic-physics
 checks, and a frozen Test evaluation. The search and fitting engine lives in
 `methods/cosydelay/engine/`, while data, expression, numerical, and LLM
 support lives in `methods/cosydelay/support/`. These are details of this one

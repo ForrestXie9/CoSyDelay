@@ -21,7 +21,7 @@ CoSyDelay combines language-model-assisted symbolic search with numerical fittin
 5. Candidates evolve through initialization and regeneration. Survivor selection uses the declared Training fitness, combining Training R-squared with the binary physical-compliance term.
 6. The best expression is retained as a compact, interpretable delay model. Validation and Test data are kept separate from the search and are not used to select candidates.
 
-The default search uses a population of 10 expressions and 9 evolutionary generations: 10 initial candidates plus 90 offspring, or 100 evaluated candidates in total. Generated runs, audit logs, and result files stay local and are ignored by Git.
+The default search uses a population of 10 expressions and 10 total generation batches: 10 initial candidates plus 9 regeneration rounds, or 100 evaluated candidates in total. The population and generation counts are configurable at runtime; generated runs, audit logs, and result files stay local and are ignored by Git.
 
 ## Repository structure
 
