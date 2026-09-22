@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """Configuration for the OpenAI-compatible LLM gateway.
 
 All runtime settings can be overridden through environment variables.  The

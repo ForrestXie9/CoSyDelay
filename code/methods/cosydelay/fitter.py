@@ -13,10 +13,10 @@ import os
 import traceback
 from typing import Mapping, Optional
 
-from methods.cosydelay_v19_accelerated_equivalent.fitter import PersistentAcceleratedEquivalentFitter
-from methods.cosydelay_v18_fit_timeout_guard.fit_timeout import _restore_rng
-from methods.cosydelay_v16_manuscript_principlewise.fitter import legacy_numeric_r9_probe_disabled, scrub_legacy_probe_fields
-from methods.prospective_optimizer_conditioning_v1.role_policy import coefficient_bounds_for_expression
+from methods.cosydelay._internal.accelerated_search.fitter import PersistentAcceleratedEquivalentFitter
+from methods.cosydelay._internal.fit_guard.fit_timeout import _restore_rng
+from methods.cosydelay._internal.training_protocol.fitter import legacy_numeric_r9_probe_disabled, scrub_legacy_probe_fields
+from methods.cosydelay._internal.optimizer_conditioning.role_policy import coefficient_bounds_for_expression
 from .range_policy import (
     COSYDELAY_RANGE_PROFILE,
     COSYDELAY_RANGE_PROFILE_ID,
@@ -91,8 +91,8 @@ def accelerated_fit_supervisor_main(connection, static_kwargs: dict, settings: d
                 # Preserve an explicit provenance marker at the supervisor
                 # boundary. The guarded wrapper serializes this
                 # dictionary unchanged; recording it here makes the CoSyDelay
-                # post-run audit robust even when an inner compatibility
-                # layer replaces the diagnostics object.
+                # Keep provenance robust even when an inner worker replaces
+                # the diagnostics object.
                 diagnostics.setdefault(
                     "formal_method_adapter",
                     "cosydelay.fitter",

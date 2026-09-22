@@ -115,7 +115,7 @@ def resolve_api_key(
         index = _assignment_index(assignments, slot.strip(), len(keys))
         return keys[index], f"pool:{slot} -> key[{index}]"
 
-    from methods.cosydelay_v9_clean_from_scratch.operations.run04_pythonw_supervisor import (
+    from methods.cosydelay._internal.data_protocol.operations.run04_pythonw_supervisor import (
         recover_api_key,
     )
 

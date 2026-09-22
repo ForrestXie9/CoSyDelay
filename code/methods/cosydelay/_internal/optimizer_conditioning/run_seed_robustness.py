@@ -1,0 +1,216 @@
+"""Training-only paired robustness test for the all-log optimizer arm."""
+
+from __future__ import annotations
+
+from concurrent.futures import ProcessPoolExecutor
+from datetime import datetime, timezone
+import argparse
+import hashlib
+import json
+import multiprocessing
+from pathlib import Path
+import time
+
+import numpy as np
+
+from constants import INTERSECTION_CONFIGS
+from data_processing import load_dataset_flexible, preprocess_data_flexible
+import optimization_lane
+from methods.cosydelay._internal.optimizer_parallel4_v3.fitter import (
+    fit_lane_parameters_mixed_jacobian_parallel,
+)
+from methods.cosydelay._internal.data_protocol.policy import CLEAN_POLICY
+from methods.cosydelay._internal.data_protocol.run_formal_training_search import (
+    DEFAULT_DATA_DIR,
+    jsonable,
+    lanes_for,
+)
+from methods.cosydelay._internal.optimizer_conditioning.all_log_fitter import (
+    fit_lane_parameters_all_log_parallel,
+)
+from methods.cosydelay._internal.optimizer_conditioning.run_fixed_winner_ablation import (
+    ARM_ALL_LOG,
+    ARM_BASELINE,
+    DEFAULT_ROLE_BOUNDS,
+    EXPRESSIONS_BY_INTERSECTION,
+    aggregate_pairs,
+    delta,
+    run_fit,
+)
+
+
+SEED_LABELS = ("replicate-01", "replicate-02", "replicate-03")
+
+
+def paired_seed(intersection: int, expression: str, label: str) -> int:
+    digest = hashlib.sha256(
+        (
+            "prospective-optimizer-conditioning-v1-seed-robustness|"
+            f"{intersection}|{label}|{expression}"
+        ).encode("utf-8")
+    ).digest()
+    return int.from_bytes(digest[:8], "little", signed=False)
+
+
+def utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data-dir", type=Path, default=DEFAULT_DATA_DIR)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    if args.output.exists():
+        raise FileExistsError(args.output)
+
+    rows = []
+    pairs = []
+    started = time.perf_counter()
+    for intersection in range(1, 7):
+        expression = EXPRESSIONS_BY_INTERSECTION[intersection]
+        train_path = (
+            args.data_dir / f"Intersection_{intersection}_Train.jsonl"
+        ).resolve()
+        if "test" in train_path.name.lower() or "validation" in train_path.name.lower():
+            raise RuntimeError(f"forbidden non-Training path: {train_path}")
+        train = preprocess_data_flexible(
+            load_dataset_flexible(str(train_path), intersection), intersection
+        ).reset_index(drop=True)
+        config = INTERSECTION_CONFIGS[intersection]
+        approaches = list(config["approaches"])
+        targets = {
+            approach: train[f"Delay_{approach}"].reset_index(drop=True)
+            for approach in approaches
+        }
+        lanes, lane_to_approach = lanes_for(config)
+        prepared = optimization_lane.prepare_optimization_context(
+            train, lanes, lane_to_approach, intersection
+        )
+
+        with ProcessPoolExecutor(
+            max_workers=CLEAN_POLICY.approach_workers_cap,
+            mp_context=multiprocessing.get_context("spawn"),
+        ) as executor:
+            for replicate_index, label in enumerate(SEED_LABELS):
+                seed = paired_seed(intersection, expression, label)
+                arm_order = [ARM_BASELINE, ARM_ALL_LOG]
+                if (intersection + replicate_index) % 2 == 0:
+                    arm_order.reverse()
+                by_arm = {}
+                for arm in arm_order:
+                    fitter = (
+                        fit_lane_parameters_mixed_jacobian_parallel
+                        if arm == ARM_BASELINE
+                        else fit_lane_parameters_all_log_parallel
+                    )
+                    fit_result = run_fit(
+                        fitter=fitter,
+                        expression=expression,
+                        train=train,
+                        lanes=lanes,
+                        lane_to_approach=lane_to_approach,
+                        targets=targets,
+                        intersection=intersection,
+                        prepared=prepared,
+                        seed=seed,
+                        executor=executor,
+                        bounds_override=None,
+                        quality_profile=DEFAULT_ROLE_BOUNDS,
+                    )
+                    row = {
+                        "intersection_id": intersection,
+                        "seed_label": label,
+                        "seed": seed,
+                        "arm": arm,
+                        "expression": expression,
+                        "train_file_name": train_path.name,
+                        "train_rows": len(train),
+                        "test_file_opened": False,
+                        **fit_result,
+                    }
+                    rows.append(row)
+                    by_arm[arm] = row
+                    print(
+                        f"I{intersection} {label} {arm}: "
+                        f"R2={fit_result['metrics']['macro_raw_r2']:.8f} "
+                        f"RMSE={fit_result['metrics']['pooled_rmse']:.8f} "
+                        f"MAE={fit_result['metrics']['pooled_mae']:.8f} "
+                        f"wall={fit_result['wall_seconds']:.2f}s",
+                        flush=True,
+                    )
+                baseline = by_arm[ARM_BASELINE]
+                all_log = by_arm[ARM_ALL_LOG]
+                pairs.append(
+                    {
+                        "intersection_id": intersection,
+                        "seed_label": label,
+                        "new_arm": ARM_ALL_LOG,
+                        "reference_arm": ARM_BASELINE,
+                        "delta": delta(all_log, baseline),
+                        "physics_same": (
+                            all_log["physics_joint_pass"]
+                            == baseline["physics_joint_pass"]
+                        ),
+                    }
+                )
+
+    by_intersection = {
+        str(intersection): aggregate_pairs(
+            [item for item in pairs if item["intersection_id"] == intersection]
+        )
+        for intersection in range(1, 7)
+    }
+    summary = {
+        "overall": aggregate_pairs(pairs),
+        "by_intersection": by_intersection,
+        "intersections": 6,
+        "replicates_per_intersection": len(SEED_LABELS),
+        "paired_comparisons": len(pairs),
+    }
+    result = {
+        "schema_version": 1,
+        "method_id": "prospective_optimizer_conditioning_v1",
+        "status": "training_only_seed_robustness",
+        "not_external_generalization_evidence": True,
+        "created_utc": utc_now(),
+        "data_policy": "I1-I6 Training only; Validation and Test forbidden",
+        "test_file_opened": False,
+        "seed_labels_predeclared": list(SEED_LABELS),
+        "paired_seed_rule": (
+            "SHA256(method-id|intersection|seed-label|expression), first 8 "
+            "bytes little-endian; same seed within each optimizer pair"
+        ),
+        "expressions_predeclared": EXPRESSIONS_BY_INTERSECTION,
+        "arms": [ARM_BASELINE, ARM_ALL_LOG],
+        "common_settings": {
+            "optimizer": "L-BFGS-B",
+            "restarts": CLEAN_POLICY.optimizer_restarts,
+            "maxiter": CLEAN_POLICY.optimizer_maxiter,
+            "maxfun": CLEAN_POLICY.optimizer_maxfun,
+            "objective": "per-approach MSE",
+            "coefficient_bounds": DEFAULT_ROLE_BOUNDS,
+        },
+        "arm_order_counterbalanced": True,
+        "rows": rows,
+        "pairs": pairs,
+        "summary": summary,
+        "wall_seconds": float(time.perf_counter() - started),
+    }
+    args.output.mkdir(parents=True, exist_ok=False)
+    (args.output / "robustness.json").write_text(
+        json.dumps(jsonable(result), ensure_ascii=False, indent=2, allow_nan=False)
+        + "\n",
+        encoding="utf-8",
+    )
+    (args.output / "summary.json").write_text(
+        json.dumps(jsonable(summary), ensure_ascii=False, indent=2, allow_nan=False)
+        + "\n",
+        encoding="utf-8",
+    )
+    print(json.dumps(summary, ensure_ascii=False, indent=2), flush=True)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

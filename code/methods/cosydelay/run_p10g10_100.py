@@ -5,36 +5,36 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from methods.cosydelay_v21_global_selection.run_p10g10_100 import _source as _v21_source
+from methods.cosydelay._internal.global_selection.run_p10g10_100 import _source as _v21_source
 
 
 def _source() -> str:
     source = _v21_source()
     replacements = (
         (
-            "from methods.cosydelay_v21_global_selection import prompt as v20_prompt",
+            "from methods.cosydelay._internal.global_selection import prompt as v20_prompt",
             "from methods.cosydelay import prompt as v20_prompt",
         ),
         (
-            "from methods.cosydelay_v21_global_selection import global_population as pairwise_population",
-            "from methods import structural_diversity_population_v1 as pairwise_population",
+            "from methods.cosydelay._internal.global_selection import global_population as pairwise_population",
+            "from methods.cosydelay._internal import structural_diversity as pairwise_population",
         ),
         (
-            "from methods.cosydelay_v19_accelerated_equivalent.regeneration import install_after_compatibility_layers",
-            "from methods.cosydelay.regeneration import install_after_compatibility_layers",
+            "from methods.cosydelay._internal.accelerated_search.regeneration import install_regeneration_hooks",
+            "from methods.cosydelay.regeneration import install_regeneration_hooks",
         ),
         (
-            "from methods.cosydelay_v19_accelerated_equivalent.fitter import accelerated_fit_supervisor_main",
+            "from methods.cosydelay._internal.accelerated_search.fitter import accelerated_fit_supervisor_main",
             "from methods.cosydelay.fitter import accelerated_fit_supervisor_main",
         ),
         (
             """        v16_run._restart_composition_audit=lambda history: original_restart_audit(
             history, population=10, generations=9
         )""",
-            """        # CoSyDelay retains the same 10+9 search budget, but the legacy
-        # The compatibility supervisor does not serialize legacy restart
-        # composition metadata. Keep it non-blocking and record the
-        # provenance warning in the CoSyDelay result wrapper.
+            """        # CoSyDelay retains the same 10+9 search budget.
+        # The worker does not serialize optional restart-composition metadata.
+        # Keep this audit non-blocking and record the provenance warning in the
+        # CoSyDelay result wrapper.
         v16_run._restart_composition_audit=lambda history: None""",
         ),
         (
@@ -117,14 +117,14 @@ def main() -> int:
             },
         }
     )
-    # The internal compatibility supervisor may omit the optional adapter marker
+    # The internal worker may omit the optional adapter marker
     # from serialized per-candidate diagnostics. Keep that audit state
     # explicit without treating an otherwise complete 100-candidate search as
     # a numerical failure.
     result["fitter_provenance_audit"] = {
         "expected": "cosydelay.fitter",
         "observed": "missing_optional_marker",
-        "warning": "compatibility supervisor omitted formal adapter marker",
+        "warning": "worker omitted formal adapter marker",
     }
     result["regeneration_policy"] = {
         "checked_attempts": 5,

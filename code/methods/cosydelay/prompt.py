@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Mapping, Optional
 
-from methods.cosydelay_v21_global_selection import prompt as base_prompt
+from methods.cosydelay._internal.global_selection import prompt as base_prompt
 
 
 def build_init_prompt(

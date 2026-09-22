@@ -97,8 +97,8 @@ def test_cosydelay_runner_installs_structural_family_novelty_overlay() -> None:
     from .run_p10g10_100 import _source
 
     source = _source()
-    assert "structural_diversity_population_v1 as pairwise_population" in source
-    assert "cosydelay_v21_global_selection import global_population as pairwise_population" not in source
+    assert "structural_diversity as pairwise_population" in source
+    assert "global_selection import global_population as pairwise_population" not in source
 
 
 def test_cosydelay_embedded_population_overlay_runtime() -> None:
@@ -116,7 +116,7 @@ def test_cosydelay_embedded_population_overlay_runtime() -> None:
 
 
 def test_full_history_is_checked_without_prompt_history() -> None:
-    from methods.structural_diversity_population_v1 import (
+    from methods.cosydelay._internal.structural_diversity import (
         wrap_without_history_prompt,
     )
 
@@ -134,7 +134,7 @@ def test_full_history_is_checked_without_prompt_history() -> None:
 
 def test_history_is_checked_program_side_but_not_written_into_prompt() -> None:
     import expression_adaptation_lane as lane
-    from methods.structural_diversity_population_v1 import (
+    from methods.cosydelay._internal.structural_diversity import (
         wrap_without_history_prompt,
     )
 

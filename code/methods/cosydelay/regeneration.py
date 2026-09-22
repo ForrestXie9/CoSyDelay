@@ -11,7 +11,7 @@ from __future__ import annotations
 from contextlib import contextmanager
 from typing import Callable, Iterator
 
-from methods.uniform_regeneration_contract_v1 import (
+from methods.cosydelay._internal.uniform_regeneration import (
     REGENERATION_ATTEMPTS,
     wrap_uniform_regeneration,
 )
@@ -27,7 +27,7 @@ def with_uniform_regeneration(generator: Callable) -> Callable:
 
 
 @contextmanager
-def install_after_compatibility_layers(
+def install_regeneration_hooks(
     install_candidate: Callable,
     population_module,
     **kwargs,
