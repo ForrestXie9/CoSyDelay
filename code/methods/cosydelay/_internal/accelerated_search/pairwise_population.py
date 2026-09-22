@@ -11,7 +11,7 @@ def _physical_principles_fraction(individual: dict) -> str:
     passed = sum(float(value) >= 1.0 - 1e-12 for value in scores.values())
     return f"{passed}/{len(scores)}"
 
-_source_path = Path(__file__).resolve().parents[3] / "_runtime" / "population_evolution_lane.py"
+_source_path = Path(__file__).resolve().parents[2] / "_runtime" / "population_evolution_lane.py"
 _source = _source_path.read_text(encoding="utf-8")
 
 _old_exclusions = '''            slot_excluded = (

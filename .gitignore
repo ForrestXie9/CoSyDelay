@@ -4,7 +4,7 @@
 *.key
 *.pfx
 code/llm_keys.local.json
-code/methods/_runtime/llm_keys.local.json
+code/methods/cosydelay/_runtime/llm_keys.local.json
 
 # Local generated runs and Python build artifacts
 runs/

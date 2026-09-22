@@ -6,8 +6,8 @@ traffic-delay method.
 The implementation uses the fixed Training/Validation/Test protocol, a
 P10/G10 candidate budget, training-only fitting and selection, traffic-physics
 checks, and a frozen Test evaluation. Implementation helpers live in
-`methods/cosydelay/_internal/` and generic runtime helpers live in
-`methods/_runtime/`. They are private implementation details of this one
+`methods/cosydelay/_internal/` and `methods/cosydelay/_runtime/` contain
+private implementation and runtime helpers. They are details of this one
 method, not additional methods or historical variants.
 
 Run from the repository root:

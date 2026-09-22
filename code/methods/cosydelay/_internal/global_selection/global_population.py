@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-_source_path = Path(__file__).resolve().parents[3] / "_runtime" / "population_evolution_lane.py"
+_source_path = Path(__file__).resolve().parents[2] / "_runtime" / "population_evolution_lane.py"
 _source = _source_path.read_text(encoding="utf-8")
 _old = '''            slot_excluded = (
                 [item["expr"] for item in population]
