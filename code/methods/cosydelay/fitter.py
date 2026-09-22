@@ -13,10 +13,10 @@ import os
 import traceback
 from typing import Mapping, Optional
 
-from methods.cosydelay._internal.accelerated_search.fitter import PersistentAcceleratedEquivalentFitter
-from methods.cosydelay._internal.fit_guard.fit_timeout import _restore_rng
-from methods.cosydelay._internal.training_protocol.fitter import legacy_numeric_r9_probe_disabled, scrub_legacy_probe_fields
-from methods.cosydelay._internal.optimizer_conditioning.role_policy import coefficient_bounds_for_expression
+from methods.cosydelay.engine.accelerated_search.fitter import PersistentAcceleratedEquivalentFitter
+from methods.cosydelay.engine.fit_guard.fit_timeout import _restore_rng
+from methods.cosydelay.engine.training_protocol.fitter import legacy_numeric_r9_probe_disabled, scrub_legacy_probe_fields
+from methods.cosydelay.engine.optimizer_conditioning.role_policy import coefficient_bounds_for_expression
 from .range_policy import (
     COSYDELAY_RANGE_PROFILE,
     COSYDELAY_RANGE_PROFILE_ID,

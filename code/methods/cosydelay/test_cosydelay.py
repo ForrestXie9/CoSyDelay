@@ -116,7 +116,7 @@ def test_cosydelay_embedded_population_overlay_runtime() -> None:
 
 
 def test_full_history_is_checked_without_prompt_history() -> None:
-    from methods.cosydelay._internal.structural_diversity import (
+    from methods.cosydelay.engine.structural_diversity import (
         wrap_without_history_prompt,
     )
 
@@ -134,7 +134,7 @@ def test_full_history_is_checked_without_prompt_history() -> None:
 
 def test_history_is_checked_program_side_but_not_written_into_prompt() -> None:
     import expression_adaptation_lane as lane
-    from methods.cosydelay._internal.structural_diversity import (
+    from methods.cosydelay.engine.structural_diversity import (
         wrap_without_history_prompt,
     )
 

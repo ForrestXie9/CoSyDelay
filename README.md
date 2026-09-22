@@ -28,8 +28,8 @@ The default search uses a population of 10 expressions and 9 evolutionary genera
 ```text
 code/
   methods/cosydelay/       public CoSyDelay entry point and command-line runner
-    _internal/              private implementation helpers for the final method
-    _runtime/               private parsing, fitting, physics, and LLM support
+    engine/                 search, fitting, physics, and candidate selection
+    support/                data, expression, numerical, and LLM support
 data/
   locked_splits/           I1-I6 Training/Validation/Test JSONL files
   augmented_aasumo/        supplied same-layout oversaturation input and metadata
@@ -41,10 +41,9 @@ requirements-lock.txt     pinned environment used for the release
 LICENSE                    source-license terms
 ```
 
-`methods/cosydelay/` is the only released method. Its `_internal/` and
-`_runtime/` subdirectories contain private implementation and runtime helpers,
-not historical methods or alternative variants. The public Python interface is
-`methods.cosydelay`.
+`methods/cosydelay/` is the only released method. Its `engine/` and `support/`
+subdirectories are implementation details, not historical methods or
+alternative variants. The public Python interface is `methods.cosydelay`.
 
 The repository intentionally does not contain API keys, historical variant folders, search logs, generated predictions, result tables, or bootstrap outputs.
 

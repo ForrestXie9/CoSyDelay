@@ -3,9 +3,9 @@
 The public method is `methods.cosydelay`.
 
 - `methods/cosydelay/` contains the user-facing method package and runner.
-- `methods/cosydelay/_runtime/` contains the current data, expression,
+- `methods/cosydelay/support/` contains the current data, expression,
   physics, optimization, and LLM support modules.
-- `methods/cosydelay/_internal/` contains the private implementation helpers
+- `methods/cosydelay/engine/` contains the private implementation helpers
   used by the final method. It is not a collection of released baselines or
   experiment results.
 

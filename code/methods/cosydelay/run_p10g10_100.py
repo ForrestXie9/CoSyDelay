@@ -5,26 +5,26 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from methods.cosydelay._internal.global_selection.run_p10g10_100 import _source as _v21_source
+from methods.cosydelay.engine.global_selection.run_p10g10_100 import _source as _v21_source
 
 
 def _source() -> str:
     source = _v21_source()
     replacements = (
         (
-            "from methods.cosydelay._internal.global_selection import prompt as v20_prompt",
+            "from methods.cosydelay.engine.global_selection import prompt as v20_prompt",
             "from methods.cosydelay import prompt as v20_prompt",
         ),
         (
-            "from methods.cosydelay._internal.global_selection import global_population as pairwise_population",
-            "from methods.cosydelay._internal import structural_diversity as pairwise_population",
+            "from methods.cosydelay.engine.global_selection import global_population as pairwise_population",
+            "from methods.cosydelay.engine import structural_diversity as pairwise_population",
         ),
         (
-            "from methods.cosydelay._internal.accelerated_search.regeneration import install_regeneration_hooks",
+            "from methods.cosydelay.engine.accelerated_search.regeneration import install_regeneration_hooks",
             "from methods.cosydelay.regeneration import install_regeneration_hooks",
         ),
         (
-            "from methods.cosydelay._internal.accelerated_search.fitter import accelerated_fit_supervisor_main",
+            "from methods.cosydelay.engine.accelerated_search.fitter import accelerated_fit_supervisor_main",
             "from methods.cosydelay.fitter import accelerated_fit_supervisor_main",
         ),
         (

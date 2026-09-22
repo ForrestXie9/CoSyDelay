@@ -11,7 +11,7 @@ from __future__ import annotations
 from contextlib import contextmanager
 from typing import Callable, Iterator
 
-from methods.cosydelay._internal.uniform_regeneration import (
+from methods.cosydelay.engine.uniform_regeneration import (
     REGENERATION_ATTEMPTS,
     wrap_uniform_regeneration,
 )
