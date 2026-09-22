@@ -2,10 +2,30 @@
 
 from __future__ import annotations
 
+import argparse
 import json
+import os
 from pathlib import Path
+import sys
 
 from methods.cosydelay.engine.global_selection.run_p10g10_100 import _source as _v21_source
+
+
+DEFAULT_POPULATION = 10
+DEFAULT_GENERATIONS = 10
+
+
+def _search_parameters() -> tuple[argparse.Namespace, list[str]]:
+    """Read public search-budget options and leave runner options untouched."""
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--population", type=int, default=DEFAULT_POPULATION)
+    parser.add_argument("--generations", type=int, default=DEFAULT_GENERATIONS)
+    args, remaining = parser.parse_known_args()
+    if args.population < 1:
+        raise ValueError("--population must be a positive integer")
+    if args.generations < 1:
+        raise ValueError("--generations must be a positive integer")
+    return args, remaining
 
 
 def _source() -> str:
@@ -78,16 +98,79 @@ def _source() -> str:
         if old not in source:
             raise RuntimeError(f"CoSyDelay runner could not locate source fragment: {old}")
         source = source.replace(old, new)
+
+    budget_fragment = """    run_contract=(replace(V20_CONTRACT,requested_seed=args.seed_base)
+                  if args.seed_base is not None else V20_CONTRACT)"""
+    budget_replacement = """    configured_population = int(
+        os.environ.get("COSYDELAY_POPULATION", "10")
+    )
+    configured_generations = int(
+        os.environ.get("COSYDELAY_GENERATIONS", "10")
+    )
+    internal_generations = configured_generations - 1
+    configured_candidates = configured_population * configured_generations
+    if args.seed_base is not None:
+        run_contract = replace(
+            V20_CONTRACT,
+            population=configured_population,
+            generations=internal_generations,
+            successful_candidate_budget=configured_candidates,
+            requested_seed=args.seed_base,
+        )
+    else:
+        run_contract = replace(
+            V20_CONTRACT,
+            population=configured_population,
+            generations=internal_generations,
+            successful_candidate_budget=configured_candidates,
+        )"""
+    if budget_fragment not in source:
+        raise RuntimeError("CoSyDelay runner could not locate its budget configuration")
+    source = source.replace(budget_fragment, budget_replacement)
+    source = source.replace(
+        "    v16_run.GENERATIONS=9",
+        "    v16_run.POPULATION=configured_population\n"
+        "    v16_run.GENERATIONS=internal_generations",
+    )
+    source = source.replace(
+        "expected_candidates=100",
+        "expected_candidates=configured_candidates",
+    )
+    source = source.replace(
+        "if len(fitted_ids) != 100 or int(result.get('candidate_evaluations',-1)) != 100:",
+        "if len(fitted_ids) != configured_candidates or int(result.get('candidate_evaluations',-1)) != configured_candidates:",
+    )
+    source = source.replace(
+        "print(f'CoSyDelay I{args.intersection} P10/G10=100 complete',flush=True)",
+        "print(f'CoSyDelay I{args.intersection} P{configured_population}/G{configured_generations}={configured_candidates} complete',flush=True)",
+    )
     return source
 
 
 def main() -> int:
-    namespace = {"__name__": "cosydelay_embedded"}
-    exec(compile(_source(), "<cosydelay-search>", "exec"), namespace)
-    code = int(namespace["main"]())
+    search, runner_argv = _search_parameters()
+    old_argv = sys.argv[:]
+    old_population = os.environ.get("COSYDELAY_POPULATION")
+    old_generations = os.environ.get("COSYDELAY_GENERATIONS")
+    os.environ["COSYDELAY_POPULATION"] = str(search.population)
+    os.environ["COSYDELAY_GENERATIONS"] = str(search.generations)
+    sys.argv = [sys.argv[0], *runner_argv]
+    try:
+        namespace = {"__name__": "cosydelay_embedded"}
+        exec(compile(_source(), "<cosydelay-search>", "exec"), namespace)
+        code = int(namespace["main"]())
+    finally:
+        sys.argv = old_argv
+        if old_population is None:
+            os.environ.pop("COSYDELAY_POPULATION", None)
+        else:
+            os.environ["COSYDELAY_POPULATION"] = old_population
+        if old_generations is None:
+            os.environ.pop("COSYDELAY_GENERATIONS", None)
+        else:
+            os.environ["COSYDELAY_GENERATIONS"] = old_generations
     if code:
         return code
-    import sys
 
     output = Path(sys.argv[sys.argv.index("--output") + 1])
     result_path = output / "result.json"
@@ -98,9 +181,14 @@ def main() -> int:
             "survivor_selection": "global_mu_plus_lambda",
             "prompt_contract": "numeric_operating_domain_plus_broad_structural_regeneration",
             "restart_contract": (
-                "each outer restart runs the identical P10/G10 search; "
+                f"each outer restart runs the identical P{search.population}/G{search.generations} search; "
                 "only its declared seed differs"
             ),
+            "search_budget": {
+                "population": search.population,
+                "generations": search.generations,
+                "candidate_evaluations": search.population * search.generations,
+            },
             "coefficient_range_contract": {
                 "source": "predeclared after paired Training-only range screen",
                 "scale": [0.001, 1000.0],
@@ -117,10 +205,12 @@ def main() -> int:
             },
         }
     )
+    result["candidate_evaluations_required"] = (
+        search.population * search.generations
+    )
     # The internal worker may omit the optional adapter marker
     # from serialized per-candidate diagnostics. Keep that audit state
-    # explicit without treating an otherwise complete 100-candidate search as
-    # a numerical failure.
+    # explicit without treating a complete search as a numerical failure.
     result["fitter_provenance_audit"] = {
         "expected": "cosydelay.fitter",
         "observed": "missing_optional_marker",

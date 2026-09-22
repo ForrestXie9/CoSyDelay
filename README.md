@@ -87,13 +87,21 @@ Run one intersection from the repository root. Use a new output directory for ev
 ```powershell
 $stamp = Get-Date -Format "yyyyMMdd_HHmmss"
 
-python -u -m methods.cosydelay.run_p10g10_100 `
+python -u -m methods.cosydelay.run `
   --intersection 1 `
   --data-dir .\data\locked_splits `
-  --output ".\runs\cosydelay_i1_$stamp"
+  --output ".\runs\cosydelay_i1_$stamp" `
+  --population 10 `
+  --generations 10
 ```
 
-Replace `1` with an intersection ID from `1` to `6`. The runner reads the corresponding Training file from `data/locked_splits`. It does not use Validation or Test data to choose expressions. Keep the resulting `runs/` directory local if you want to inspect the search history; it is excluded from the release.
+Replace `1` with an intersection ID from `1` to `6`. `--population` and
+`--generations` are optional; their defaults are `10` and `10`, respectively.
+The candidate budget is their product, so the default evaluates 100 candidate
+structures. The runner reads the corresponding Training file from
+`data/locked_splits`. It does not use Validation or Test data to choose
+expressions. Keep the resulting `runs/` directory local if you want to inspect
+the search history; it is excluded from the release.
 
 Before making an API call, you can verify the public import path without a key:
 

@@ -54,12 +54,29 @@ def test_uniform_wrapper_has_no_second_prompt_or_fallback_mode() -> None:
 
 
 def test_cosydelay_runner_embeds_uniform_policy() -> None:
-    from .run_p10g10_100 import _source
+    from .run import _source
 
     source = _source()
     assert "cosydelay.regeneration" in source
     assert "cosydelay.fitter" in source
     compile(source, "<cosydelay-runner-test>", "exec")
+
+
+def test_search_budget_options_have_defaults_and_accept_custom_values(monkeypatch) -> None:
+    from .run import _search_parameters
+
+    monkeypatch.setattr(
+        "sys.argv",
+        ["run", "--population", "7", "--generations", "4", "--intersection", "2"],
+    )
+    args, remaining = _search_parameters()
+    assert (args.population, args.generations) == (7, 4)
+    assert remaining == ["--intersection", "2"]
+
+    monkeypatch.setattr("sys.argv", ["run", "--intersection", "1"])
+    args, remaining = _search_parameters()
+    assert (args.population, args.generations) == (10, 10)
+    assert remaining == ["--intersection", "1"]
 
 
 def test_expanded_range_profile_is_declared_without_optimizer_import() -> None:
@@ -94,7 +111,7 @@ def test_regeneration_does_not_fallback_to_initialization() -> None:
 
 
 def test_cosydelay_runner_installs_structural_family_novelty_overlay() -> None:
-    from .run_p10g10_100 import _source
+    from .run import _source
 
     source = _source()
     assert "structural_diversity as pairwise_population" in source
@@ -104,7 +121,7 @@ def test_cosydelay_runner_installs_structural_family_novelty_overlay() -> None:
 def test_cosydelay_embedded_population_overlay_runtime() -> None:
     import inspect
 
-    from .run_p10g10_100 import _source
+    from .run import _source
 
     namespace = {"__name__": "cosydelay_overlay_probe"}
     exec(compile(_source(), "<cosydelay-overlay-probe>", "exec"), namespace)

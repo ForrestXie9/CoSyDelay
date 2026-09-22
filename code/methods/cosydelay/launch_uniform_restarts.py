@@ -19,9 +19,11 @@ def main() -> int:
     parser.add_argument("--restarts", type=int, default=20)
     parser.add_argument("--seed-base", type=int, default=20260901)
     parser.add_argument("--workers", type=int, default=1)
+    parser.add_argument("--population", type=int, default=10)
+    parser.add_argument("--generations", type=int, default=10)
     args = parser.parse_args()
-    if args.restarts < 1 or args.workers < 1:
-        raise ValueError("restarts and workers must be positive")
+    if any(value < 1 for value in (args.restarts, args.workers, args.population, args.generations)):
+        raise ValueError("restarts, workers, population, and generations must be positive")
     intersections = sorted(set(args.intersections))
     if not intersections or any(item not in range(1, 7) for item in intersections):
         raise ValueError("intersections must be selected from I1-I6")
@@ -38,16 +40,17 @@ def main() -> int:
     def execute(task: tuple[int, int, int]) -> dict:
         restart, intersection, seed = task
         # Keep the layout compatible with the frozen Validation selector:
-        # repeat/search/intersection/run_01.  Every repeat has the same code
-        # path and the same P10/G10 budget.
+        # repeat/search/intersection/run_01. Every repeat has the same code
+        # path and the same declared search budget.
         output = root / f"repeat_{restart:02d}" / "search" / f"intersection_{intersection:02d}" / "run_01"
         output.parent.mkdir(parents=True, exist_ok=True)
         log = output.parent / "search.stdout.log"
         command = [
             sys.executable, "-u", "-m",
-            "methods.cosydelay.run_p10g10_100",
+            "methods.cosydelay.run",
             "--intersection", str(intersection), "--output", str(output),
             "--data-dir", str(data), "--seed-base", str(seed),
+            "--population", str(args.population), "--generations", str(args.generations),
         ]
         with log.open("w", encoding="utf-8") as stream:
             code = subprocess.call(command, stdout=stream, stderr=subprocess.STDOUT, env=os.environ.copy())
