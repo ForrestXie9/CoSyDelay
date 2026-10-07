@@ -20,12 +20,6 @@ requirements-lock.txt     pinned environment used for the release
 LICENSE                    source-license terms
 ```
 
-`methods/cosydelay/` is the only released method. Its `engine/` and `support/`
-subdirectories are implementation details, not historical methods or
-alternative variants. The public Python interface is `methods.cosydelay`.
-
-The repository intentionally does not contain API keys, historical variant folders, search logs, generated predictions, result tables, or bootstrap outputs.
-
 ## Environment setup
 
 Python 3.11 or newer is recommended. From the repository root, create an isolated environment and install the pinned dependencies:
