@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import shutil
+import subprocess
 
 import numpy as np
 import pandas as pd
@@ -235,3 +237,18 @@ def test_reused_search_cannot_be_reported_with_a_different_budget_or_seed():
     for overrides in ({"population": 10}, {"generations": 10}, {"seed_base": 999}):
         with pytest.raises(ValueError):
             p.archive_settings(p.load_config(), archive, overrides)
+
+
+@pytest.mark.skipif(shutil.which("git") is None, reason="git is optional outside a source checkout")
+def test_source_version_marks_uncommitted_new_code_as_dirty(tmp_path, monkeypatch):
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True, capture_output=True)
+    config = tmp_path / "configs" / "cosydelay.json"
+    p.write_json(config, p.load_config())
+    source = tmp_path / "code" / "methods" / "cosydelay" / "new_module.py"
+    source.parent.mkdir(parents=True)
+    source.write_text("# uncommitted source\n", encoding="utf-8")
+    monkeypatch.setattr(p, "REPOSITORY", tmp_path)
+    monkeypatch.setattr(p, "DEFAULT_CONFIG", config)
+    version = p.source_version()
+    assert version["git_worktree_dirty"]
+    assert version["source_sha256"][source.relative_to(tmp_path).as_posix()] == p.digest(source)

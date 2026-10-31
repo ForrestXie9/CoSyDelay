@@ -124,7 +124,7 @@ def source_version():
     # Never hash credential files or include environment variables in provenance.
     paths.append(DEFAULT_CONFIG)
     return {"git_commit": git("rev-parse", "HEAD"),
-            "git_worktree_dirty": bool(git("status", "--porcelain", "--untracked-files=no")),
+            "git_worktree_dirty": bool(git("status", "--porcelain", "--untracked-files=normal")),
             "source_sha256": {p.relative_to(REPOSITORY).as_posix(): digest(p) for p in paths}}
 
 
