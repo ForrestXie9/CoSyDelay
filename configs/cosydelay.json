@@ -1,0 +1,17 @@
+{
+  "protocol_id": "cosydelay_train_validation_refit_v1",
+  "population": 10,
+  "generations": 10,
+  "seed_base": 20260712,
+  "validation_metric": "mean_nonnegative_approach_r2_plus_training_binary_physics",
+  "validation_tie_breakers": ["lower_direction_average_rmse", "lower_candidate_id"],
+  "candidate_pool": "all_completed_training_candidates",
+  "refit_split": "Training+Validation",
+  "refit_restarts": 10,
+  "refit_maxiter": 200,
+  "refit_maxfun": 20000,
+  "refit_timeout_seconds": 100.0,
+  "final_physics_timeout_seconds": 30.0,
+  "physical_failure_policy": "retain_refitted_model_with_physical_component_zero_no_test_reselection",
+  "prediction_failure_policy": "fail_run_without_fallback_or_row_dropping"
+}

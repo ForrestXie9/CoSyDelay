@@ -660,6 +660,9 @@ def evolve_universal_lane_expression(
             "event": event,
             "candidate_id": individual.get("candidate_id"),
             "expression": individual.get("expr"),
+            # Validation must score the coefficients fitted during Training,
+            # not silently recalibrate non-winning candidates after the search.
+            "lane_parameters": individual.get("lane_parameters"),
             "consistency_bonus": individual.get("consistency_bonus", 0.0),
             "physical_score": individual.get("physical_score", 0.0),
             "principlewise_diagnostic_score": individual.get(

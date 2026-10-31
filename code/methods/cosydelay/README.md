@@ -3,12 +3,36 @@
 This directory is the public Python entry point for the CoSyDelay symbolic
 traffic-delay method.
 
-The implementation uses the fixed Training/Validation/Test protocol, a
-configurable population/generation budget (default P=10, G=10), training-only fitting and selection, traffic-physics
-checks, and a frozen Test evaluation. The search and fitting engine lives in
+The implementation uses the fixed Training/Validation/Test splits. Training
+alone fits candidate coefficients and drives evolution. Validation Fitness
+selects the final expression; its structure is fixed before coefficients are
+refitted on Training+Validation. All seven physical principles are rechecked
+with the refitted coefficients before the final model is frozen and tested.
+The search and fitting engine lives in
 `methods/cosydelay/engine/`, while data, expression, numerical, and LLM
 support lives in `methods/cosydelay/support/`. These are details of this one
 method, not additional methods or historical variants.
+
+The public stages are coordinated by `pipeline.py`; `physics.py` isolates the
+complete native verifier in a time/memory-bounded worker. Defaults are stored
+in `configs/cosydelay.json` at the repository root.
+
+Validation selects the maximum of `mean_a(max(0, R2_val,a)) + P_train`, with
+lower direction-average Validation RMSE and then lower candidate ID breaking
+ties. Every completed candidate retains its Training coefficients, so selection
+does not introduce an unreported recalibration. R2 reporting itself is not
+clipped. I4-E and I6-W are excluded from direction-average reporting because
+they are the predeclared invalid/constant target directions.
+
+After coefficient-only Training+Validation refitting, the native seven-rule
+verifier runs again. Failure or an incomplete resource-limited check sets the
+final physical component to zero; the refitted model is still the frozen Test
+model. Numerical fitting or prediction failures fail the run without a
+Test-driven fallback. Model and physical-report hashes are saved before Test.
+
+LLM content uses `### Expression` and `### Explanation` text sections, followed
+by safe symbolic parsing. The HTTP response envelope being JSON does not mean
+that the generated expression content is a JSON object.
 
 Run from the repository root:
 

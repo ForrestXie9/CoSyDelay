@@ -1,7 +1,8 @@
 """CoSyDelay accelerated fitter with a pre-screened nonlinear range profile.
 
 The objective, all-positive log coordinates, ten starts, restart scheduler,
-and Training-only restart selection are fixed by the released protocol. The
+and restart selection on the supplied fit data are fixed by the protocol:
+Training during search; Training+Validation during the final refit. The
 nonlinear range profile uses power exponents ``[0.01, 8]`` and exponential
 coefficients ``[1e-5, 2]``.
 """

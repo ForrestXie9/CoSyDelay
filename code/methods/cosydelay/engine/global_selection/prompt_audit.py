@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+import os
 
 from methods.cosydelay.engine.accelerated_search.prompt_audit import audit_v20_prompts
 
@@ -23,7 +24,9 @@ def audit_v21_prompts(llm_attempts: list[dict]) -> dict:
             text = text.replace("30<=Cycle_Time", "declared_cycle_domain")
             copied["prompt"] = text
         masked.append(copied)
-    audit = audit_v20_prompts(masked)
+    audit = audit_v20_prompts(
+        masked, require_regeneration=int(os.environ.get("COSYDELAY_GENERATIONS", "10")) > 1
+    )
     successful = [
         str(item.get("prompt", ""))
         for item in llm_attempts

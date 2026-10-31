@@ -7,6 +7,8 @@ CoSyDelay is a symbolic-learning method for estimating traffic delay at signaliz
 ```text
 code/
   methods/cosydelay/       public CoSyDelay entry point and command-line runner
+    pipeline.py             validation selection, final refit, and frozen testing
+    physics.py              bounded execution of the seven physical checks
     engine/                 search, fitting, physics, and candidate selection
     support/                data, expression, numerical, and LLM support
 data/
@@ -15,6 +17,7 @@ data/
   signal_optimization/
     SingleTSCBaselines/    three attributed junction scenario packages
 CITATIONS.md               method citation and third-party data notices
+configs/cosydelay.json      default search and data-use configuration
 requirements.txt           runtime dependency specification
 requirements-lock.txt     pinned environment used for the release
 LICENSE                    source-license terms
@@ -70,11 +73,33 @@ python -u -m methods.cosydelay.run `
 
 Replace `1` with an intersection ID from `1` to `6`. `--population` and
 `--generations` are optional; their defaults are `10` and `10`, respectively.
-The candidate budget is their product, so the default evaluates 100 candidate
-structures. The runner reads the corresponding Training file from
-`data/locked_splits`. It does not use Validation or Test data to choose
-expressions. Keep the resulting `runs/` directory local if you want to inspect
-the search history; it is excluded from the release.
+The default configuration is [`configs/cosydelay.json`](configs/cosydelay.json).
+The runner fits candidate coefficients and drives evolution using Training
+only, then selects from all completed candidates using Validation Fitness:
+
+`F_val = mean_a(max(0, R2_val,a)) + P_train`.
+
+Here `a` denotes a valid approach; `P_train` is 1 only when all seven physical
+checks pass for the Training-fitted coefficients, otherwise 0. Ties use lower
+direction-average Validation RMSE, then lower candidate ID. Validation does
+not refit the candidates, and pooled R2 is not used for selection.
+
+After selection, the structure is fixed and only its coefficients are refitted
+on Training+Validation. All seven physical checks are rerun with those new
+coefficients. A failed or resource-limited check gives a final physical
+component of 0; it never inherits the earlier pass score or triggers Test-based
+reselection. The persisted final model is frozen before Test is opened. Test
+R2, RMSE and MAE are raw per-approach metrics averaged equally across valid
+approaches; Test Fitness uses clipped per-approach R2 plus the **final** binary
+physical component. Invalid predictions fail the run rather than dropping rows
+or reverting to a previous model.
+
+Local outputs include `configuration.json`, `validation_candidates.json`,
+`selection_frozen.json`, `final_physics.json`, `model.json`, `freeze.json`,
+`split_access_audit.json` and `result.json`. They record the effective settings,
+source commit/source hashes, data hashes, final coefficients and stage timings.
+Search time and selection/refit/check/testing time are reported separately.
+Generated runs remain local and are ignored by Git.
 
 Before making an API call, you can verify the public import path without a key:
 
@@ -84,7 +109,11 @@ python -c "import methods.cosydelay.fitter; import expression_rules; print('CoSy
 
 ## Included data
 
-`data/locked_splits/` contains the six intersection-specific Training, Validation, and Test JSONL files plus the frozen split metadata. Validation is separate from Training, and Test is not used during candidate selection.
+`data/locked_splits/` contains the six intersection-specific Training (5,909),
+Validation (1,512), and Test (2,853) JSONL records plus frozen split metadata
+(seed `20260712`). The sample assignments are unchanged. Training and
+Validation remain separate during search and selection; they are combined only
+for the final coefficient refit. Test never participates in fitting or selection.
 
 `data/augmented_aasumo/AASumo-I1to6_AllSites-14220.csv` is the supplied same-layout extension for high-demand and oversaturation stress tests. Its `manifest.json` and `protocol.json` describe the data and its intended boundary. Only input data and metadata are distributed; no predictions or evaluation outputs are included.
 

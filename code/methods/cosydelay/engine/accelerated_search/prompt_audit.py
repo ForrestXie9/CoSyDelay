@@ -7,7 +7,7 @@ from methods.cosydelay.engine.training_protocol.prompt import (
 )
 
 
-def audit_v20_prompts(llm_attempts: list[dict]) -> dict:
+def audit_v20_prompts(llm_attempts: list[dict], *, require_regeneration: bool = True) -> dict:
     prompts = [
         str(item["prompt"])
         for item in llm_attempts
@@ -94,8 +94,9 @@ def audit_v20_prompts(llm_attempts: list[dict]) -> dict:
     if (
         not prompts
         or not initialization
-        or not regeneration
+        or (require_regeneration and not regeneration)
         or not all(audit[name] for name in required)
     ):
         raise RuntimeError(f"V20 prompt audit failed: {audit}")
+    audit["regeneration_required"] = bool(require_regeneration)
     return audit

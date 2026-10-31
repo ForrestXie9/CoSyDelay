@@ -1,8 +1,10 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "split_seed": 20260712,
   "validation_fraction_of_original_train": 0.2,
-  "fit_and_validation_are_never_recombined": true,
+  "fit_and_validation_are_never_recombined": false,
+  "training_validation_disjoint_during_search_and_selection": true,
+  "recombination_policy": "coefficient-only Training+Validation refit after expression selection; no structure search",
   "test_used_for_selection": false,
   "intersections": {
     "1": {

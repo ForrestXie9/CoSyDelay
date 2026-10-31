@@ -1,0 +1,2 @@
+# Preserve the exact audited bytes, including line endings, on every platform.
+data/locked_splits/*.jsonl -text whitespace=cr-at-eol

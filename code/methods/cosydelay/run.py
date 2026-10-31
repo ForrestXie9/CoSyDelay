@@ -1,4 +1,4 @@
-"""Run one CoSyDelay search using the released training-only protocol."""
+"""Run Training search, Validation Fitness selection, refit, and frozen Test."""
 
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import sys
+import time
 
 from methods.cosydelay.engine.global_selection.run_p10g10_100 import _source as _v21_source
 
@@ -109,6 +110,9 @@ def _source() -> str:
     )
     internal_generations = configured_generations - 1
     configured_candidates = configured_population * configured_generations
+    run_policy = replace(
+        V20_POLICY, population=configured_population, generations=internal_generations
+    )
     if args.seed_base is not None:
         run_contract = replace(
             V20_CONTRACT,
@@ -127,6 +131,9 @@ def _source() -> str:
     if budget_fragment not in source:
         raise RuntimeError("CoSyDelay runner could not locate its budget configuration")
     source = source.replace(budget_fragment, budget_replacement)
+    for target in ("v18_run.V18_POLICY", "v18_integration.V18_POLICY", "v16_run.V16_POLICY"):
+        source = source.replace(f"{target}=V20_POLICY", f"{target}=run_policy")
+    source = source.replace("'policy':V20_POLICY.to_dict()", "'policy':run_policy.to_dict()")
     source = source.replace(
         "    v16_run.GENERATIONS=9",
         "    v16_run.POPULATION=configured_population\n"
@@ -147,7 +154,7 @@ def _source() -> str:
     return source
 
 
-def main() -> int:
+def _training_search_main() -> int:
     search, runner_argv = _search_parameters()
     old_argv = sys.argv[:]
     old_population = os.environ.get("COSYDELAY_POPULATION")
@@ -228,6 +235,79 @@ def main() -> int:
         json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     return 0
+
+
+def main() -> int:
+    from .pipeline import (DEFAULT_CONFIG, DEFAULT_DATA, archive_settings, complete_pipeline, digest,
+                           load_config, source_version, write_json)
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--intersection", type=int, choices=range(1, 7), default=1)
+    parser.add_argument("--data-dir", type=Path, default=DEFAULT_DATA)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
+    parser.add_argument("--population", type=int, help="override the config population (default 10)")
+    parser.add_argument("--generations", type=int, help="override total generation batches (default 10)")
+    parser.add_argument("--seed-base", type=int, help="override the config seed")
+    parser.add_argument("--search-dir", type=Path,
+                        help="reuse a complete Training-only search archive with matching data hashes and all coefficients")
+    args = parser.parse_args()
+    settings = load_config(args.config)
+    for key in ("population", "generations", "seed_base"):
+        value = getattr(args, key)
+        if value is not None:
+            if key != "seed_base" and value < 1:
+                parser.error(f"--{key} must be positive")
+            settings[key] = value
+    if args.search_dir is not None:
+        archived = json.loads((args.search_dir / "result.json").read_text(encoding="utf-8"))
+        settings = archive_settings(settings, archived, {key: getattr(args, key)
+                                    for key in ("population", "generations", "seed_base")})
+    output, data = args.output.resolve(), args.data_dir.resolve()
+    if output.exists():
+        raise FileExistsError(f"refusing to overwrite run directory: {output}")
+    for split in ("Train", "Validation", "Test"):
+        path = data / f"Intersection_{args.intersection}_{split}.jsonl"
+        if not path.is_file():
+            raise FileNotFoundError(path)
+    if not (data / "FROZEN_SPLIT_MANIFEST.json").is_file():
+        raise FileNotFoundError(data / "FROZEN_SPLIT_MANIFEST.json")
+    output.mkdir(parents=True)
+    version = source_version()
+    write_json(output / "configuration.json", {"effective": settings, "source": str(args.config.resolve()),
+               "source_config_sha256": digest(args.config),
+               "source_version": version, "data_dir": str(data), "intersection_id": args.intersection})
+    task_started = time.monotonic()
+    try:
+        search = args.search_dir.resolve() if args.search_dir else output / "search"
+        search_started = time.monotonic()
+        if args.search_dir is None:
+            previous_argv = sys.argv[:]
+            sys.argv = [sys.argv[0], "--intersection", str(args.intersection), "--data-dir", str(data),
+                        "--output", str(search), "--population", str(settings["population"]),
+                        "--generations", str(settings["generations"]), "--seed-base", str(settings["seed_base"])]
+            try:
+                code = _training_search_main()
+            finally:
+                sys.argv = previous_argv
+            if code:
+                raise RuntimeError(f"Training search failed with exit code {code}")
+        search_wall = time.monotonic() - search_started
+        result = complete_pipeline(search=search, data=data, output=output,
+                                   intersection=args.intersection, settings=settings, version=version)
+        result["timing"].update(training_search_seconds=search_wall if args.search_dir is None else None,
+                                search_archive_reused=args.search_dir is not None,
+                                total_pipeline_seconds=time.monotonic() - task_started)
+        write_json(output / "result.json", result)
+        print(f"CoSyDelay I{args.intersection} complete: Test {result['test']['diravg']}; "
+              f"Fitness={result['test']['fitness']:.6f}; final physics={result['physical_binary']}", flush=True)
+        return 0
+    except Exception as exc:
+        status_path = output / "status.json"
+        if not status_path.exists():
+            write_json(status_path, {"status": "failed", "phase": "training_search",
+                                    "reason": f"{type(exc).__name__}: {exc}"})
+        raise
 
 
 if __name__ == "__main__":
