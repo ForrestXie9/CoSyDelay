@@ -1,9 +1,5 @@
-# CoSyDelay support modules
+# Data and LLM utilities
 
-These modules implement the data preparation, symbolic parsing and validation,
-traffic-physics checks, parameter optimization, population evolution, and LLM
-interface used by `methods.cosydelay`.
+Data loading, expression parsing and validation, numerical utilities, and the LLM client are implemented here.
 
-They are an internal support layer. Import the public method through
-`methods.cosydelay` rather than depending on this directory's internal module
-layout.
+See the [module guide](../README.md) for the main CoSyDelay components.

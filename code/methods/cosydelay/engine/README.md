@@ -1,11 +1,5 @@
-# Private implementation modules
+# Search and numerical implementations
 
-This directory contains the implementation modules used by the public
-`methods.cosydelay` package.  The subdirectories are organized by implementation
-responsibility (data protocol, candidate generation, fitting, physics checks,
-regeneration, and selection); they are not separate methods, baselines, or
-historical releases.
+Candidate generation, population selection, coefficient fitting, and physical verification are implemented here.
 
-Users should import and run only `methods.cosydelay`.  The internal layout is
-kept stable so the public runner and its tests can be reproduced without the
-research workspace.
+Use the public runner in [run.py](../run.py). See the [module guide](../README.md) for an overview.

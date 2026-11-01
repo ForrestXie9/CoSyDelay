@@ -1,13 +1,5 @@
-# CoSyDelay source modules
+# CoSyDelay source
 
-The public method is `methods.cosydelay`.
+The method implementation is in [methods/cosydelay/](methods/cosydelay/). Its command-line entry point is `python -m methods.cosydelay.run`.
 
-- `methods/cosydelay/` contains the user-facing method package and runner.
-- `methods/cosydelay/support/` contains the current data, expression,
-  physics, optimization, and LLM support modules.
-- `methods/cosydelay/engine/` contains the private implementation helpers
-  used by the final method. It is not a collection of released baselines or
-  experiment results.
-
-No search output, history, API key, or reviewer experiment is required from
-this directory.
+See the [project README](../README.md) for installation and a runnable example, or the [module guide](methods/cosydelay/README.md) to navigate the code.
