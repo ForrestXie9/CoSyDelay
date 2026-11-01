@@ -5,7 +5,8 @@ traffic-delay method.
 
 The implementation uses the fixed Training/Validation/Test splits. Training
 alone fits candidate coefficients and drives evolution. Validation Fitness
-selects the final expression; its structure is fixed before coefficients are
+selects the final expression from the final population of `P` survivors; its
+structure is fixed before coefficients are
 refitted on Training+Validation. All seven physical principles are rechecked
 with the refitted coefficients before the final model is frozen and tested.
 The search and fitting engine lives in
@@ -23,6 +24,13 @@ ties. Every completed candidate retains its Training coefficients, so selection
 does not introduce an unreported recalibration. R2 reporting itself is not
 clipped. I4-E and I6-W are excluded from direction-average reporting because
 they are the predeclared invalid/constant target directions.
+
+The engine records the actual final survivor IDs before any held-out access.
+Validation evaluates only these `P` candidates, including surviving parents
+from earlier generations. The entire archive and the last `P` offspring are
+not alternative selection pools. `selection_pool.json` freezes the exact
+eligible population before Validation is opened; archives lacking the survivor
+snapshot are rejected.
 
 After coefficient-only Training+Validation refitting, the native seven-rule
 verifier runs again. Failure or an incomplete resource-limited check sets the

@@ -1009,6 +1009,11 @@ def evolve_universal_lane_expression(
             "wall_budget_exhausted": bool(wall_budget_exhausted),
             "completed_generations": int(completed_generations),
             "population_size_final": len(population),
+            # Record the actual surviving population, not the last P offspring.
+            # This snapshot is created before any held-out evaluation.
+            "final_population_candidate_ids": [
+                int(item["candidate_id"]) for item in population
+            ],
             "wall_elapsed_seconds": float(total_wall_seconds),
             "score_mode": score_mode,
             "residual_guidance_mode": residual_guidance_mode,
@@ -1016,6 +1021,7 @@ def evolve_universal_lane_expression(
             "seed": seed,
             "selection_source": "training",
             "validation_accessed_during_evolution": False,
+            "heldout_access_during_evolution": False,
             "candidate_evaluations": len(evaluated_candidates),
             "use_feasible_archive": bool(use_feasible_archive),
             "feasible_archive_size": len(feasible_archive),

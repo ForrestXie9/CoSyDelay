@@ -75,14 +75,19 @@ Replace `1` with an intersection ID from `1` to `6`. `--population` and
 `--generations` are optional; their defaults are `10` and `10`, respectively.
 The default configuration is [`configs/cosydelay.json`](configs/cosydelay.json).
 The runner fits candidate coefficients and drives evolution using Training
-only, then selects from all completed candidates using Validation Fitness:
+only, then selects from the final population of `P` surviving candidates using
+Validation Fitness (not from the full evolutionary history or the last `P`
+offspring):
 
 `F_val = mean_a(max(0, R2_val,a)) + P_train`.
 
 Here `a` denotes a valid approach; `P_train` is 1 only when all seven physical
 checks pass for the Training-fitted coefficients, otherwise 0. Ties use lower
 direction-average Validation RMSE, then lower candidate ID. Validation does
-not refit the candidates, and pooled R2 is not used for selection.
+not refit the candidates, and pooled R2 is not used for selection. The actual
+survivor IDs and Training-fitted coefficients are saved before Validation is
+opened. An older archive without recorded final survivors is rejected rather
+than silently substituting an inferred population.
 
 After selection, the structure is fixed and only its coefficients are refitted
 on Training+Validation. All seven physical checks are rerun with those new
@@ -94,7 +99,7 @@ approaches; Test Fitness uses clipped per-approach R2 plus the **final** binary
 physical component. Invalid predictions fail the run rather than dropping rows
 or reverting to a previous model.
 
-Local outputs include `configuration.json`, `validation_candidates.json`,
+Local outputs include `configuration.json`, `selection_pool.json`, `validation_candidates.json`,
 `selection_frozen.json`, `final_physics.json`, `model.json`, `freeze.json`,
 `split_access_audit.json` and `result.json`. They record the effective settings,
 source commit/source hashes, data hashes, final coefficients and stage timings.

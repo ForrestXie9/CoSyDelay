@@ -182,6 +182,11 @@ def _training_search_main() -> int:
     output = Path(sys.argv[sys.argv.index("--output") + 1])
     result_path = output / "result.json"
     result = json.loads(result_path.read_text(encoding="utf-8"))
+    history = json.loads((output / "history.json").read_text(encoding="utf-8"))
+    summaries = [item for item in history if item.get("event") == "search_budget_summary"]
+    if len(summaries) != 1 or len(summaries[0].get("final_population_candidate_ids", [])) != search.population:
+        raise RuntimeError("Training search did not preserve its actual final population")
+    result["final_population_candidate_ids"] = summaries[0]["final_population_candidate_ids"]
     result.update(
         {
             "formal_version": "CoSyDelay",
@@ -250,7 +255,7 @@ def main() -> int:
     parser.add_argument("--generations", type=int, help="override total generation batches (default 10)")
     parser.add_argument("--seed-base", type=int, help="override the config seed")
     parser.add_argument("--search-dir", type=Path,
-                        help="reuse a complete Training-only search archive with matching data hashes and all coefficients")
+                        help="reuse a complete Training-only archive with matching hashes, coefficients, and recorded final survivors")
     args = parser.parse_args()
     settings = load_config(args.config)
     for key in ("population", "generations", "seed_base"):

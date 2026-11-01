@@ -17,6 +17,12 @@ def physics(passed):
     return {"joint_pass": passed, "rule_scores": {k: float(passed) for k in p.MANUSCRIPT_RULE_NAMES}}
 
 
+def fixture_settings(population=2, generations=1):
+    settings = p.load_config()
+    settings.update(population=population, generations=generations)
+    return settings
+
+
 def fixture_data(tmp_path):
     data, search = tmp_path / "data", tmp_path / "search"
     data.mkdir()
@@ -31,11 +37,17 @@ def fixture_data(tmp_path):
                  "intersections": {"1": {"files": declarations}}})
     p.write_json(search / "result.json", {"intersection_id": 1, "accessed_splits": ["train"],
                  "test_file_opened": False, "train_file_sha256": declarations["train"]["sha256"],
-                 "candidate_evaluations": 2})
+                 "candidate_evaluations": 2, "search_budget": {"population": 2, "generations": 1},
+                 "final_population_candidate_ids": [1, 2]})
     records = [{"event": "evaluated", "candidate_id": index, "expression": "Cycle_Time * a1 / GR_phase",
                 "lane_parameters": {"S_L": {"a1": value}},
                 "evaluation_details": {"verifier": physics(passed)}}
                for index, value, passed in [(1, .1, False), (2, .2, True)]]
+    records.append({"event": "search_budget_summary", "population_size_final": 2,
+                    "completed_generations": 0, "candidate_evaluations": 2,
+                    "wall_budget_exhausted": False, "validation_accessed_during_evolution": False,
+                    "heldout_access_during_evolution": False,
+                    "final_population_candidate_ids": [1, 2]})
     p.write_json(search / "history.json", records)
     return data, search
 
@@ -71,7 +83,7 @@ def test_validation_uses_fitness_and_test_uses_refitted_model(tmp_path):
     output = tmp_path / "output"
     FakeRunner.refit_calls = 0
     result = p.complete_pipeline(search=search, data=data, output=output, intersection=1,
-                                 settings=p.load_config(), version={"git_commit": "test"}, runner_factory=FakeRunner)
+                                 settings=fixture_settings(), version={"git_commit": "test"}, runner_factory=FakeRunner)
     selection = json.loads((output / "selection_frozen.json").read_text(encoding="utf-8"))
     model = json.loads((output / "model.json").read_text(encoding="utf-8"))
     audit = json.loads((output / "split_access_audit.json").read_text(encoding="utf-8"))
@@ -87,8 +99,12 @@ def test_validation_uses_fitness_and_test_uses_refitted_model(tmp_path):
     assert not audit["test_opened_before_freeze"]
     assert all(e["phase"] == "test" for e in audit["events"] if e["split"] == "test")
     assert p.digest(output / "model.json") == result["model_sha256"]
+    pool = json.loads((output / "selection_pool.json").read_text(encoding="utf-8"))
+    assert pool["candidate_ids"] == [1, 2]
+    assert pool["test_or_validation_opened"] is False
+    assert selection["candidate_pool"] == "final_population"
     with pytest.raises(FileExistsError):
-        p.complete_pipeline(search=search, data=data, output=output, intersection=1, settings=p.load_config())
+        p.complete_pipeline(search=search, data=data, output=output, intersection=1, settings=fixture_settings())
 
 
 def test_test_access_during_refit_is_denied(tmp_path):
@@ -102,7 +118,7 @@ def test_test_access_during_refit_is_denied(tmp_path):
     output = tmp_path / "blocked"
     with pytest.raises(PermissionError):
         p.complete_pipeline(search=search, data=data, output=output, intersection=1,
-                            settings=p.load_config(), version={}, runner_factory=BadRunner)
+                            settings=fixture_settings(), version={}, runner_factory=BadRunner)
     assert not (output / "model.json").exists()
     assert not (output / "result.json").exists()
     audit = json.loads((output / "split_access_audit.json").read_text())
@@ -123,12 +139,12 @@ def test_unsafe_or_incomplete_search_cannot_be_relabelled_three_way(tmp_path, de
         if defect == "missing_coefficients":
             value[0].pop("lane_parameters")
         else:
-            value.pop()
+            value.pop(0)
     p.write_json(path, value)
     output = tmp_path / "rejected"
     with pytest.raises(ValueError):
         p.complete_pipeline(search=search, data=data, output=output, intersection=1,
-                            settings=p.load_config(), version={}, runner_factory=FakeRunner)
+                            settings=fixture_settings(), version={}, runner_factory=FakeRunner)
     audit = json.loads((output / "split_access_audit.json").read_text())
     assert not any(e["split"] in ("validation", "test") for e in audit["events"])
 
@@ -145,7 +161,7 @@ def test_nonfinite_test_prediction_fails_without_fallback(tmp_path):
     output = tmp_path / "nonfinite"
     with pytest.raises(ValueError, match="no rows may be dropped"):
         p.complete_pipeline(search=search, data=data, output=output, intersection=1,
-                            settings=p.load_config(), version={}, runner_factory=NonfiniteRunner)
+                            settings=fixture_settings(), version={}, runner_factory=NonfiniteRunner)
     assert (output / "model.json").exists()
     assert not (output / "result.json").exists()
     assert json.loads((output / "status.json").read_text())["phase"] == "test"
@@ -237,6 +253,107 @@ def test_reused_search_cannot_be_reported_with_a_different_budget_or_seed():
     for overrides in ({"population": 10}, {"generations": 10}, {"seed_base": 999}):
         with pytest.raises(ValueError):
             p.archive_settings(p.load_config(), archive, overrides)
+
+
+@pytest.mark.parametrize("discarded_fit_missing", [False, True])
+def test_validation_cannot_select_a_discarded_candidate_or_only_the_last_offspring(tmp_path, discarded_fit_missing):
+    data, search = fixture_data(tmp_path)
+    result = json.loads((search / "result.json").read_text())
+    result.update(candidate_evaluations=4, search_budget={"population": 2, "generations": 2},
+                  final_population_candidate_ids=[2, 4])
+    p.write_json(search / "result.json", result)
+    history = json.loads((search / "history.json").read_text())
+    first, parent, summary = history
+    first["lane_parameters"]["S_L"]["a1"] = .001  # best Validation prediction, but discarded
+    first["evaluation_details"]["verifier"] = physics(True)
+    if discarded_fit_missing:
+        first["lane_parameters"] = None  # discarded fitting failures are not eligible
+    offspring = [{**parent, "candidate_id": i, "lane_parameters": {"S_L": {"a1": value}}}
+                 for i, value in ((3, .003), (4, .4))]
+    summary.update(completed_generations=1, candidate_evaluations=4, final_population_candidate_ids=[2, 4])
+    p.write_json(search / "history.json", [first, parent, *offspring, summary])
+    output = tmp_path / "final_population_only"
+    p.complete_pipeline(search=search, data=data, output=output, intersection=1,
+                        settings=fixture_settings(generations=2), version={}, runner_factory=FakeRunner)
+    selected = json.loads((output / "selection_frozen.json").read_text())
+    scored = json.loads((output / "validation_candidates.json").read_text())
+    assert selected["candidate"]["candidate_id"] == 2  # surviving parent, not IDs 1 or 3
+    assert selected["candidate_pool_size"] == 2
+    assert {row["candidate_id"] for row in scored} == {2, 4}
+
+
+@pytest.mark.parametrize("defect", ["missing", "duplicate", "unknown", "incomplete", "disagreement", "wrong_budget"])
+def test_unverifiable_final_population_fails_before_validation(tmp_path, defect):
+    data, search = fixture_data(tmp_path)
+    history = json.loads((search / "history.json").read_text())
+    summary = history[-1]
+    if defect == "missing":
+        summary.pop("final_population_candidate_ids")
+    elif defect == "duplicate":
+        summary["final_population_candidate_ids"] = [1, 1]
+    elif defect == "unknown":
+        summary["final_population_candidate_ids"] = [1, 999]
+    elif defect == "incomplete":
+        summary["completed_generations"] = -1
+    elif defect == "wrong_budget":
+        result = json.loads((search / "result.json").read_text())
+        result["search_budget"]["population"] = 1
+        p.write_json(search / "result.json", result)
+    else:
+        summary["final_population_candidate_ids"] = [2, 1]
+    p.write_json(search / "history.json", history)
+    output = tmp_path / "unsafe_population"
+    with pytest.raises(ValueError):
+        p.complete_pipeline(search=search, data=data, output=output, intersection=1,
+                            settings=fixture_settings(), version={}, runner_factory=FakeRunner)
+    audit = json.loads((output / "split_access_audit.json").read_text())
+    assert not any(event["split"] in ("validation", "test") for event in audit["events"])
+
+
+def test_archive_selection_is_not_a_supported_default_config(tmp_path):
+    settings = p.load_config()
+    assert settings["candidate_pool"] == "final_population"
+    settings["candidate_pool"] = "all_completed_training_candidates"
+    path = tmp_path / "old_archive_policy.json"
+    p.write_json(path, settings)
+    with pytest.raises(ValueError, match="restricted to the final population"):
+        p.load_config(path)
+
+
+def test_native_evolution_records_actual_surviving_parent_and_offspring(tmp_path, monkeypatch):
+    from .engine import structural_diversity as engine
+    expressions = iter([
+        "Cycle_Time * (a1 + a2 * flow_lane / GR_phase)",
+        "Cycle_Time * (a1 + a2 * log(1 + flow_lane) / GR_phase)",
+        "Cycle_Time * (a1 + a2 * exp(flow_lane) / GR_phase)",
+        "Cycle_Time * (a1 + a2 * flow_lane**2 / GR_phase)",
+    ])
+    scores = iter([1.9, 1.8, 1.7, 1.95])
+    manifest = json.loads((p.DEFAULT_DATA / "FROZEN_SPLIT_MANIFEST.json").read_text())
+    frame, _ = p.read_split(p.DEFAULT_DATA, 1, "Train", manifest)
+    frame = frame.iloc[:6].copy()
+    lanes, mapping = p.lanes_for(p.INTERSECTION_CONFIGS[1])
+
+    def evaluate(*args, **kwargs):
+        fitness = next(scores)
+        return 1., fitness - 1., fitness, {lane: {"a1": .1, "a2": .2} for lane in lanes}, (True, ""), {
+            "verifier": physics(True), "status": "evaluated"}
+
+    monkeypatch.setattr(engine, "safe_generate_universal_lane_expression", lambda *a, **k: (next(expressions), "", ""))
+    monkeypatch.setattr(engine, "evaluate_expression_with_fitting", evaluate)
+    _, _, _, _, history = engine.evolve_universal_lane_expression(
+        df_train=frame, lanes=lanes, lane_to_approach=mapping,
+        approach_targets={a: frame[f"Delay_{a}"] for a in ("S", "E", "N", "W")},
+        universal_features=["flow_lane", "GR_phase", "Cycle_Time"],
+        intersection_id=1, pop_size=2, generations=1, seed=123)
+    summary = next(item for item in history if item.get("event") == "search_budget_summary")
+    assert summary["final_population_candidate_ids"] == [4, 1]
+    assert summary["population_size_final"] == 2
+    assert summary["validation_accessed_during_evolution"] is False
+    from .engine.data_protocol.run_formal_training_search import sanitize_formal_history
+    cleaned = sanitize_formal_history(summary)
+    assert cleaned["final_population_candidate_ids"] == [4, 1]
+    assert cleaned["heldout_access_during_evolution"] is False
 
 
 @pytest.mark.skipif(shutil.which("git") is None, reason="git is optional outside a source checkout")

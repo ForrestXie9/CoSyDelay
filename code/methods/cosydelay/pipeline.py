@@ -86,14 +86,14 @@ def load_config(path=DEFAULT_CONFIG):
                "physical_failure_policy", "prediction_failure_policy"}
     if set(settings) != allowed:
         raise ValueError("config contains missing or unsupported fields; credentials belong in the environment")
-    if settings.get("protocol_id") != "cosydelay_train_validation_refit_v1":
+    if settings.get("protocol_id") != "cosydelay_final_population_validation_refit_v2":
         raise ValueError("unsupported CoSyDelay protocol")
     if settings.get("validation_metric") != "mean_nonnegative_approach_r2_plus_training_binary_physics":
         raise ValueError("validation metric must match the released Fitness definition")
     if settings.get("validation_tie_breakers") != ["lower_direction_average_rmse", "lower_candidate_id"]:
         raise ValueError("unsupported validation tie-breaking policy")
-    if settings.get("candidate_pool") != "all_completed_training_candidates":
-        raise ValueError("all archived Training candidates must be considered")
+    if settings.get("candidate_pool") != "final_population":
+        raise ValueError("Validation selection is restricted to the final population")
     if settings.get("refit_split") != "Training+Validation":
         raise ValueError("final coefficient refit must use Training+Validation")
     if (settings.get("refit_restarts"), settings.get("refit_maxiter"), settings.get("refit_maxfun")) != (10, 200, 20000):
@@ -243,7 +243,8 @@ def read_split(data, intersection, split, manifest):
     return frame, set(signatures)
 
 
-def archived_candidates(search, expected_train_sha, intersection):
+def archived_final_population(search, expected_train_sha, intersection, settings):
+    """Recover recorded final survivors; never guess from the last offspring."""
     search = Path(search)
     result = json.loads((search / "result.json").read_text(encoding="utf-8"))
     if result.get("train_file_sha256") != expected_train_sha:
@@ -257,14 +258,43 @@ def archived_candidates(search, expected_train_sha, intersection):
     ids = [item["candidate_id"] for item in candidates]
     if not candidates or len(ids) != len(set(ids)) or len(candidates) != result.get("candidate_evaluations"):
         raise ValueError("Training candidate archive is incomplete or contains duplicate candidate IDs")
-    for candidate in candidates:
+    budget = result.get("search_budget", {})
+    population, generations = settings["population"], settings["generations"]
+    if (budget.get("population"), budget.get("generations")) != (population, generations):
+        raise ValueError("Training search budget differs from the selected configuration")
+    if len(candidates) != population * generations:
+        raise ValueError("a complete fixed-budget search is required before final-population selection")
+    summaries = [item for item in history if item.get("event") == "search_budget_summary"]
+    if len(summaries) != 1:
+        raise ValueError("missing or ambiguous final-population snapshot")
+    summary = summaries[0]
+    final_ids = summary.get("final_population_candidate_ids")
+    if (not isinstance(final_ids, list) or len(final_ids) != population
+            or any(not isinstance(i, int) or isinstance(i, bool) for i in final_ids)
+            or len(set(final_ids)) != population or not set(final_ids).issubset(ids)):
+        raise ValueError("missing or invalid final-population candidate IDs; do not infer the last P candidates")
+    if (summary.get("population_size_final") != population
+            or summary.get("completed_generations") != generations - 1
+            or summary.get("candidate_evaluations") != len(candidates)
+            or summary.get("wall_budget_exhausted") is not False
+            or summary.get("heldout_access_during_evolution") is not False):
+        raise ValueError("final-population snapshot does not establish a complete Training-only evolution")
+    if result.get("final_population_candidate_ids") != final_ids:
+        raise ValueError("result and evolution history disagree about the final population")
+    by_id = {candidate["candidate_id"]: candidate for candidate in candidates}
+    population_records = [by_id[i] for i in final_ids]
+    for candidate in population_records:
         if not candidate.get("lane_parameters"):
-            raise ValueError("missing Training coefficients; do not silently refit candidates before Validation selection")
+            raise ValueError("missing Training coefficients for a final survivor; do not refit before Validation selection")
         physical = candidate.get("evaluation_details", {}).get("verifier")
         if physical is None:
-            raise ValueError("missing Training physical audit")
+            raise ValueError("missing final-survivor Training physical audit")
         physical_component(physical)
-    return candidates
+    return population_records, {
+        "evaluated_candidate_count": len(candidates), "population_size": population,
+        "generation_index": generations - 1, "candidate_ids": final_ids,
+        "source": "recorded_training_search_survivors",
+    }
 
 
 class NumericalRunner:
@@ -338,9 +368,16 @@ def complete_pipeline(*, search, data, output, intersection, settings, version=N
     started = time.monotonic()
     try:
         train, train_inputs = read_split(data, intersection, "Train", manifest)
-        candidates = archived_candidates(search, declarations["train"]["sha256"], intersection)
+        candidates, population = archived_final_population(
+            search, declarations["train"]["sha256"], intersection, settings)
+        write_json(output / "selection_pool.json", {"utc": utc_now(), "source_split": "Training",
+                   "test_or_validation_opened": False, **population, "candidates": candidates,
+                   "training_history_sha256": digest(search / "history.json")})
         write_json(output / "search_frozen.json", {"utc": utc_now(), "phase": "training_search_complete",
                    "validation_or_test_opened": False, "candidate_count": len(candidates),
+                   "all_evaluated_candidate_count": population["evaluated_candidate_count"],
+                   "selection_pool": "final_population", "final_population_candidate_ids": population["candidate_ids"],
+                   "selection_pool_sha256": digest(output / "selection_pool.json"),
                    "training_history_sha256": digest(search / "history.json"),
                    "training_result_sha256": digest(search / "result.json")})
         guard.phase = "validation_selection"
@@ -371,6 +408,7 @@ def complete_pipeline(*, search, data, output, intersection, settings, version=N
         selected, candidate = min(viable, key=lambda pair: validation_rank(pair[0]))
         selection = {"utc": utc_now(), "selected_by": settings["validation_metric"],
                      "tie_breakers": settings["validation_tie_breakers"], "candidate_pool_size": len(candidates),
+                     "candidate_pool": "final_population", "final_population_candidate_ids": population["candidate_ids"],
                      "candidate": candidate, "validation": selected, "test_opened": False,
                      "configuration": settings, "configuration_sha256": object_digest(settings)}
         write_json(output / "selection_frozen.json", selection)

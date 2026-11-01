@@ -1,11 +1,11 @@
 {
-  "protocol_id": "cosydelay_train_validation_refit_v1",
+  "protocol_id": "cosydelay_final_population_validation_refit_v2",
   "population": 10,
   "generations": 10,
   "seed_base": 20260712,
   "validation_metric": "mean_nonnegative_approach_r2_plus_training_binary_physics",
   "validation_tie_breakers": ["lower_direction_average_rmse", "lower_candidate_id"],
-  "candidate_pool": "all_completed_training_candidates",
+  "candidate_pool": "final_population",
   "refit_split": "Training+Validation",
   "refit_restarts": 10,
   "refit_maxiter": 200,
